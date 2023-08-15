@@ -27,14 +27,14 @@ message_ptr make_message(binary &&data, Message::Type type, unsigned int stream,
 }
 
 message_ptr make_message(message_variant data) {
-	return std::visit( //
-	    overloaded{
+	return visit( //
+	    make_overloaded(
 	        [&](binary data) { return make_message(std::move(data), Message::Binary); },
 	        [&](string data) {
 		        auto b = reinterpret_cast<const byte *>(data.data());
 		        return make_message(b, b + data.size(), Message::String);
-	        },
-	    },
+	        }
+		),
 	    std::move(data));
 }
 

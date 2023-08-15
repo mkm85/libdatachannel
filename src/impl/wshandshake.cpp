@@ -23,7 +23,8 @@
 
 using std::string;
 
-namespace rtc::impl {
+namespace rtc {
+namespace impl {
 
 using std::to_string;
 using std::chrono::system_clock;
@@ -249,6 +250,6 @@ WsHandshake::RequestError::RequestError(const string &w, int responseCode)
 
 int WsHandshake::RequestError::RequestError::responseCode() const { return mResponseCode; }
 
-} // namespace rtc::impl
+} } // namespace rtc::impl
 
 #endif

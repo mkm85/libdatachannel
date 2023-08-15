@@ -21,7 +21,8 @@
 #include <gnutls/dtls.h>
 #include <gnutls/x509.h>
 
-namespace rtc::gnutls {
+namespace rtc {
+namespace gnutls {
 
 bool check(int ret, const string &message = "GnuTLS error");
 
@@ -36,7 +37,7 @@ void free_privkey(gnutls_x509_privkey_t *privkey);
 
 gnutls_datum_t make_datum(char *data, size_t size);
 
-} // namespace rtc::gnutls
+} } // namespace rtc::gnutls
 
 #elif USE_MBEDTLS
 
@@ -50,7 +51,8 @@ gnutls_datum_t make_datum(char *data, size_t size);
 #include "mbedtls/ssl.h"
 #include "mbedtls/x509_crt.h"
 
-namespace rtc::mbedtls {
+namespace rtc {
+namespace mbedtls {
 
 bool check(int ret, const string &message = "MbedTLS error");
 
@@ -59,7 +61,7 @@ string format_time(const std::chrono::system_clock::time_point &tp);
 std::shared_ptr<mbedtls_pk_context> new_pk_context();
 std::shared_ptr<mbedtls_x509_crt> new_x509_crt();
 
-} // namespace rtc::mbedtls
+} } // namespace rtc::mbedtls
 
 #else // OPENSSL
 
@@ -79,7 +81,8 @@ std::shared_ptr<mbedtls_x509_crt> new_x509_crt();
 #define BIO_EOF -1
 #endif
 
-namespace rtc::openssl {
+namespace rtc {
+namespace openssl {
 
 void init();
 string error_string(unsigned long error);
@@ -89,7 +92,7 @@ bool check_error(int err, const string &message = "OpenSSL error");
 
 BIO *BIO_new_from_file(const string &filename);
 
-} // namespace rtc::openssl
+} } // namespace rtc::openssl
 
 #endif
 

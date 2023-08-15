@@ -28,7 +28,8 @@
 
 #endif
 
-namespace rtc::impl {
+namespace rtc {
+namespace impl {
 
 namespace {
 
@@ -69,6 +70,6 @@ binary Sha1(const string &input) {
 	return Sha1(reinterpret_cast<const byte *>(input.data()), input.size());
 }
 
-} // namespace rtc::impl
+} } // namespace rtc::impl
 
 #endif

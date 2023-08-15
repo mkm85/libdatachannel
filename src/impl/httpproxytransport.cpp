@@ -13,7 +13,8 @@
 
 #if RTC_ENABLE_WEBSOCKET
 
-namespace rtc::impl {
+namespace rtc {
+namespace impl {
 
 using std::to_string;
 using std::chrono::system_clock;
@@ -123,6 +124,6 @@ size_t HttpProxyTransport::parseHttpResponse(std::byte *buffer, size_t size) {
 	return length;
 }
 
-} // namespace rtc::impl
+} } // namespace rtc::impl
 
 #endif

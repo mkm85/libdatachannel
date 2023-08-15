@@ -30,7 +30,9 @@ typedef HRESULT(WINAPI *pfnSetThreadDescription)(HANDLE, PCWSTR);
 #include <pthread_np.h> // for pthread_set_name_np
 #endif
 
-namespace rtc::impl::utils {
+namespace rtc {
+namespace impl {
+namespace utils {
 
 using std::to_integer;
 
@@ -180,4 +182,4 @@ void set_name(const string &name) { thread_set_name_self(name.c_str()); }
 
 } // namespace this_thread
 
-} // namespace rtc::impl::utils
+} } }  // namespace rtc::impl::utils

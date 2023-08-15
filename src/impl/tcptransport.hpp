@@ -22,7 +22,8 @@
 #include <mutex>
 #include <tuple>
 
-namespace rtc::impl {
+namespace rtc {
+namespace impl {
 
 class TcpTransport final : public Transport, public std::enable_shared_from_this<TcpTransport> {
 public:
@@ -73,7 +74,7 @@ private:
 	std::mutex mSendMutex;
 };
 
-} // namespace rtc::impl
+} } // namespace rtc::impl
 
 #endif
 

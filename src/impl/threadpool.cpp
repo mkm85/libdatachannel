@@ -9,7 +9,8 @@
 #include "threadpool.hpp"
 #include "utils.hpp"
 
-namespace rtc::impl {
+namespace rtc {
+namespace impl {
 
 ThreadPool &ThreadPool::Instance() {
 	static ThreadPool *instance = new ThreadPool;
@@ -94,4 +95,4 @@ std::function<void()> ThreadPool::dequeue() {
 	return nullptr;
 }
 
-} // namespace rtc::impl
+} } // namespace rtc::impl

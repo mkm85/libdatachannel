@@ -669,7 +669,7 @@ void Description::Entry::parseSdpLine(string_view line) {
 
 int Description::Entry::ExtMap::parseId(string_view description) {
 	size_t p = description.find(' ');
-	return to_integer<int>(description.substr(0, p));
+	return ::to_integer<int>(description.substr(0, p));
 }
 
 Description::Entry::ExtMap::ExtMap(int id, string uri, Direction direction) {
@@ -688,9 +688,9 @@ void Description::Entry::ExtMap::setDescription(string_view description) {
 	const string_view idAndDirection = description.substr(0, uriStart);
 	const size_t idSplit = idAndDirection.find('/');
 	if (idSplit == string::npos) {
-		this->id = to_integer<int>(idAndDirection);
+		this->id = ::to_integer<int>(idAndDirection);
 	} else {
-		this->id = to_integer<int>(idAndDirection.substr(0, idSplit));
+		this->id = ::to_integer<int>(idAndDirection.substr(0, idSplit));
 
 		const string_view directionStr = idAndDirection.substr(idSplit + 1);
 		if (directionStr == "sendonly")
@@ -814,9 +814,9 @@ void Description::Application::parseSdpLine(string_view line) {
 		auto [key, value] = parse_pair(attr);
 
 		if (key == "sctp-port") {
-			mSctpPort = to_integer<uint16_t>(value);
+			mSctpPort = ::to_integer<uint16_t>(value);
 		} else if (key == "max-message-size") {
-			mMaxMessageSize = to_integer<size_t>(value);
+			mMaxMessageSize = ::to_integer<size_t>(value);
 		} else {
 			Entry::parseSdpLine(line);
 		}
@@ -1000,7 +1000,7 @@ void Description::Media::parseSdpLine(string_view line) {
 
 		} else if (key == "rtcp-fb") {
 			size_t p = value.find(' ');
-			int pt = to_integer<int>(value.substr(0, p));
+			int pt = ::to_integer<int>(value.substr(0, p));
 			auto it = mRtpMaps.find(pt);
 			if (it == mRtpMaps.end())
 				it = mRtpMaps.insert(std::make_pair(pt, Description::Media::RtpMap(pt))).first;
@@ -1009,7 +1009,7 @@ void Description::Media::parseSdpLine(string_view line) {
 
 		} else if (key == "fmtp") {
 			size_t p = value.find(' ');
-			int pt = to_integer<int>(value.substr(0, p));
+			int pt = ::to_integer<int>(value.substr(0, p));
 			auto it = mRtpMaps.find(pt);
 			if (it == mRtpMaps.end())
 				it = mRtpMaps.insert(std::make_pair(pt, Description::Media::RtpMap(pt))).first;
@@ -1020,7 +1020,7 @@ void Description::Media::parseSdpLine(string_view line) {
 			// always added
 
 		} else if (key == "ssrc") {
-			auto ssrc = to_integer<uint32_t>(value);
+			auto ssrc = ::to_integer<uint32_t>(value);
 			if (!hasSSRC(ssrc))
 				mSsrcs.emplace_back(ssrc);
 
@@ -1036,7 +1036,7 @@ void Description::Media::parseSdpLine(string_view line) {
 		}
 
 	} else if (match_prefix(line, "b=AS")) {
-		mBas = to_integer<int>(line.substr(line.find(':') + 1));
+		mBas = ::to_integer<int>(line.substr(line.find(':') + 1));
 	} else {
 		Entry::parseSdpLine(line);
 	}
@@ -1049,7 +1049,7 @@ Description::Media::RtpMap::RtpMap(int payloadType) {
 
 int Description::Media::RtpMap::parsePayloadType(string_view mline) {
 	size_t p = mline.find(' ');
-	return to_integer<int>(mline.substr(0, p));
+	return ::to_integer<int>(mline.substr(0, p));
 }
 
 Description::Media::RtpMap::RtpMap(string_view description) { setDescription(description); }
@@ -1059,7 +1059,7 @@ void Description::Media::RtpMap::setDescription(string_view description) {
 	if (p == string::npos)
 		throw std::invalid_argument("Invalid format description");
 
-	this->payloadType = to_integer<int>(description.substr(0, p));
+	this->payloadType = ::to_integer<int>(description.substr(0, p));
 
 	string_view line = description.substr(p + 1);
 	size_t spl = line.find('/');
@@ -1074,9 +1074,9 @@ void Description::Media::RtpMap::setDescription(string_view description) {
 		spl = line.find(' ');
 	}
 	if (spl == string::npos)
-		this->clockRate = to_integer<int>(line);
+		this->clockRate = ::to_integer<int>(line);
 	else {
-		this->clockRate = to_integer<int>(line.substr(0, spl));
+		this->clockRate = ::to_integer<int>(line.substr(0, spl));
 		this->encParams = line.substr(spl + 1);
 	}
 }

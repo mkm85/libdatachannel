@@ -23,7 +23,8 @@
 
 #include "usrsctp.h"
 
-namespace rtc::impl {
+namespace rtc {
+namespace impl {
 
 class SctpTransport final : public Transport, public std::enable_shared_from_this<SctpTransport> {
 public:
@@ -98,11 +99,11 @@ private:
 
 	const Ports mPorts;
 	struct socket *mSock;
-	std::optional<uint16_t> mNegotiatedStreamsCount;
+	optional<uint16_t> mNegotiatedStreamsCount;
 
 	Processor mProcessor;
-	std::atomic<int> mPendingRecvCount = 0;
-	std::atomic<int> mPendingFlushCount = 0;
+	std::atomic<int> mPendingRecvCount = { 0 };
+	std::atomic<int> mPendingFlushCount = { 0 };
 	std::mutex mRecvMutex;
 	std::recursive_mutex mSendMutex; // buffered amount callback is synchronous
 	Queue<message_ptr> mSendQueue;
@@ -112,14 +113,14 @@ private:
 
 	std::mutex mWriteMutex;
 	std::condition_variable mWrittenCondition;
-	std::atomic<bool> mWritten = false;     // written outside lock
-	std::atomic<bool> mWrittenOnce = false; // same
+	std::atomic<bool> mWritten = { false };     // written outside lock
+	std::atomic<bool> mWrittenOnce = { false }; // same
 
 	binary mPartialMessage, mPartialNotification;
 	binary mPartialStringData, mPartialBinaryData;
 
 	// Stats
-	std::atomic<size_t> mBytesSent = 0, mBytesReceived = 0;
+	std::atomic<size_t> mBytesSent = { 0 }, mBytesReceived = { 0 };
 
 	static void UpcallCallback(struct socket *sock, void *arg, int flags);
 	static int WriteCallback(void *sctp_ptr, void *data, size_t len, uint8_t tos, uint8_t set_df);
@@ -129,6 +130,6 @@ private:
 	static InstancesSet *Instances;
 };
 
-} // namespace rtc::impl
+} } // namespace rtc::impl
 
 #endif

@@ -8,7 +8,8 @@
 
 #include "logcounter.hpp"
 
-namespace rtc::impl {
+namespace rtc {
+namespace impl {
 
 LogCounter::LogCounter(plog::Severity severity, const std::string &text,
                        std::chrono::seconds duration) {
@@ -37,4 +38,4 @@ LogCounter &LogCounter::operator++(int) {
 	return *this;
 }
 
-} // namespace rtc::impl
+} } // namespace rtc::impl

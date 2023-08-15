@@ -4,6 +4,8 @@ project(libdatachannel
 	LANGUAGES CXX)
 set(PROJECT_DESCRIPTION "C/C++ WebRTC network library featuring Data Channels, Media Transport, and WebSockets")
 
+include(CheckIncludeFileCXX)
+
 # Options
 option(USE_MBEDTLS "Use Mbed TLS instead of OpenSSL" OFF)
 option(USE_GNUTLS "Use GnuTLS instead of OpenSSL" OFF)
@@ -49,6 +51,40 @@ list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/Modules)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(BUILD_SHARED_LIBS OFF) # to force usrsctp to be built static
 
+
+
+CHECK_INCLUDE_FILE_CXX("optional" HAVE_CXX17_OPTIONAL)
+CHECK_INCLUDE_FILE_CXX("string_view" HAVE_CXX17_STRING_VIEW)
+CHECK_INCLUDE_FILE_CXX("variant" HAVE_CXX17_VARIANT)
+
+# TODO check for cxx17 byte
+
+if (HAVE_CXX17_OPTIONAL)
+	add_definitions(-DHAVE_CXX17_OPTIONAL)
+else()
+	include_directories(${CMAKE_CURRENT_SOURCE_DIR}/deps/optional/include)
+endif()
+
+if (HAVE_CXX17_STRING_VIEW)
+	add_definitions(-DHAVE_CXX17_STRING_VIEW)
+else()
+	include_directories(${CMAKE_CURRENT_SOURCE_DIR}/deps/string-view-lite/include)
+endif()
+
+
+if (HAVE_CXX17_VARIANT)
+	add_definitions(-DHAVE_CXX17_VARIANT)
+else()
+	include_directories(${CMAKE_CURRENT_SOURCE_DIR}/deps/variant-lite/include)
+endif()
+
+if (HAVE_CXX17_BYTE)
+	add_definitions(-DHAVE_CXX17_BYTE)
+else()
+	include_directories(${CMAKE_CURRENT_SOURCE_DIR}/deps/byte-lite/include)
+endif()
+
+
 if(WIN32)
 	add_definitions(-DWIN32_LEAN_AND_MEAN)
 	if(MSVC)
@@ -57,6 +93,8 @@ if(WIN32)
 		add_definitions(-D_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING)
 	endif()
 endif()
+
+
 
 set(LIBDATACHANNEL_SOURCES
 	${CMAKE_CURRENT_SOURCE_DIR}/src/candidate.cpp

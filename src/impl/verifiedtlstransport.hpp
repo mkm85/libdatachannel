@@ -13,7 +13,8 @@
 
 #if RTC_ENABLE_WEBSOCKET
 
-namespace rtc::impl {
+namespace rtc {
+namespace impl {
 
 class VerifiedTlsTransport final : public TlsTransport {
 public:
@@ -22,7 +23,7 @@ public:
 	~VerifiedTlsTransport();
 };
 
-} // namespace rtc::impl
+} } // namespace rtc::impl
 
 #endif
 

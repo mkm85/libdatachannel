@@ -19,7 +19,8 @@
 using std::to_integer;
 using std::to_string;
 
-namespace rtc::impl {
+namespace rtc {
+namespace impl {
 
 static LogCounter COUNTER_MEDIA_TRUNCATED(plog::warning,
                                           "Number of truncated SRT(C)P packets received");
@@ -370,6 +371,6 @@ ProfileParams DtlsSrtpTransport::getProfileParamsFromName(string_view name) {
 }
 #endif
 
-} // namespace rtc::impl
+} } // namespace rtc::impl
 
 #endif

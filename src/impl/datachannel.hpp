@@ -20,7 +20,8 @@
 #include <atomic>
 #include <shared_mutex>
 
-namespace rtc::impl {
+namespace rtc {
+namespace impl {
 
 struct PeerConnection;
 
@@ -64,8 +65,8 @@ protected:
 
 	mutable std::shared_mutex mMutex;
 
-	std::atomic<bool> mIsOpen = false;
-	std::atomic<bool> mIsClosed = false;
+	std::atomic<bool> mIsOpen = { false };
+	std::atomic<bool> mIsClosed = { false };
 
 private:
 	Queue<message_ptr> mRecvQueue;
@@ -88,6 +89,6 @@ struct IncomingDataChannel final : public DataChannel {
 	void processOpenMessage(message_ptr message) override;
 };
 
-} // namespace rtc::impl
+} } // namespace rtc::impl
 
 #endif

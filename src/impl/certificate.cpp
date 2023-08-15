@@ -16,7 +16,8 @@
 #include <sstream>
 #include <unordered_map>
 
-namespace rtc::impl {
+namespace rtc {
+namespace impl {
 
 #if USE_GNUTLS
 
@@ -499,4 +500,4 @@ future_certificate_ptr make_certificate(CertificateType type) {
 
 string Certificate::fingerprint() const { return mFingerprint; }
 
-} // namespace rtc::impl
+} } // namespace rtc::impl

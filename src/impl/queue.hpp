@@ -17,7 +17,8 @@
 #include <mutex>
 #include <queue>
 
-namespace rtc::impl {
+namespace rtc {
+namespace impl {
 
 template <typename T> class Queue {
 public:
@@ -59,38 +60,38 @@ Queue<T>::Queue(size_t limit, amount_function func) : mLimit(limit), mAmount(0) 
 template <typename T> Queue<T>::~Queue() { stop(); }
 
 template <typename T> void Queue<T>::stop() {
-	std::lock_guard lock(mMutex);
+	std::lock_guard<std::mutex> lock(mMutex);
 	mStopping = true;
 	mPushCondition.notify_all();
 }
 
 template <typename T> bool Queue<T>::running() const {
-	std::lock_guard lock(mMutex);
+	std::lock_guard<std::mutex> lock(mMutex);
 	return !mQueue.empty() || !mStopping;
 }
 
 template <typename T> bool Queue<T>::empty() const {
-	std::lock_guard lock(mMutex);
+	std::lock_guard<std::mutex> lock(mMutex);
 	return mQueue.empty();
 }
 
 template <typename T> bool Queue<T>::full() const {
-	std::lock_guard lock(mMutex);
+	std::lock_guard<std::mutex> lock(mMutex);
 	return mQueue.size() >= mLimit;
 }
 
 template <typename T> size_t Queue<T>::size() const {
-	std::lock_guard lock(mMutex);
+	std::lock_guard<std::mutex> lock(mMutex);
 	return mQueue.size();
 }
 
 template <typename T> size_t Queue<T>::amount() const {
-	std::lock_guard lock(mMutex);
+	std::lock_guard<std::mutex> lock(mMutex);
 	return mAmount;
 }
 
 template <typename T> void Queue<T>::push(T element) {
-	std::unique_lock lock(mMutex);
+	std::unique_lock<std::mutex> lock(mMutex);
 	mPushCondition.wait(lock, [this]() { return !mLimit || mQueue.size() < mLimit || mStopping; });
 	if (mStopping)
 		return;
@@ -100,7 +101,7 @@ template <typename T> void Queue<T>::push(T element) {
 }
 
 template <typename T> optional<T> Queue<T>::pop() {
-	std::unique_lock lock(mMutex);
+	std::unique_lock<std::mutex> lock(mMutex);
 	if (mQueue.empty())
 		return nullopt;
 
@@ -111,19 +112,19 @@ template <typename T> optional<T> Queue<T>::pop() {
 }
 
 template <typename T> optional<T> Queue<T>::peek() {
-	std::unique_lock lock(mMutex);
-	return !mQueue.empty() ? std::make_optional(mQueue.front()) : nullopt;
+	std::unique_lock<std::mutex> lock(mMutex);
+	return !mQueue.empty() ? make_optional(mQueue.front()) : nullopt;
 }
 
 template <typename T> optional<T> Queue<T>::exchange(T element) {
-	std::unique_lock lock(mMutex);
+	std::unique_lock<std::mutex> lock(mMutex);
 	if (mQueue.empty())
 		return nullopt;
 
 	std::swap(mQueue.front(), element);
-	return std::make_optional(std::move(element));
+	return make_optional(std::move(element));
 }
 
-} // namespace rtc::impl
+} } // namespace rtc::impl
 
 #endif

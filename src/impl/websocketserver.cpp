@@ -14,7 +14,8 @@
 #include "threadpool.hpp"
 #include "utils.hpp"
 
-namespace rtc::impl {
+namespace rtc {
+namespace impl {
 
 using namespace std::placeholders;
 
@@ -96,6 +97,6 @@ void WebSocketServer::runLoop() {
 	PLOG_INFO << "Stopped WebSocketServer";
 }
 
-} // namespace rtc::impl
+} } // namespace rtc::impl
 
 #endif

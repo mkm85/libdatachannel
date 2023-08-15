@@ -20,6 +20,8 @@
 #include <arpa/inet.h>
 #endif
 
+#include <memory>
+
 namespace rtc {
 
 DataChannel::DataChannel(impl_ptr<impl::DataChannel> impl)

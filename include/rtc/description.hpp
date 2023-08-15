@@ -178,7 +178,7 @@ public:
 		bool hasSSRC(uint32_t ssrc) const;
 		void clearSSRCs();
 		std::vector<uint32_t> getSSRCs() const;
-		std::optional<std::string> getCNameForSsrc(uint32_t ssrc) const;
+		optional<std::string> getCNameForSsrc(uint32_t ssrc) const;
 
 		int bitrate() const;
 		void setBitrate(int bitrate);
@@ -230,20 +230,20 @@ public:
 	public:
 		Audio(string mid = "audio", Direction dir = Direction::SendOnly);
 
-		void addAudioCodec(int payloadType, string codec, optional<string> profile = std::nullopt);
+		void addAudioCodec(int payloadType, string codec, optional<string> profile = nullopt);
 
 		void addOpusCodec(int payloadType, optional<string> profile = DEFAULT_OPUS_AUDIO_PROFILE);
 
-		void addPCMACodec(int payloadType, optional<string> profile = std::nullopt);
+		void addPCMACodec(int payloadType, optional<string> profile = nullopt);
 
-		void addPCMUCodec(int payloadType, optional<string> profile = std::nullopt);
+		void addPCMUCodec(int payloadType, optional<string> profile = nullopt);
 	};
 
 	class RTC_CPP_EXPORT Video : public Media {
 	public:
 		Video(string mid = "video", Direction dir = Direction::SendOnly);
 
-		void addVideoCodec(int payloadType, string codec, optional<string> profile = std::nullopt);
+		void addVideoCodec(int payloadType, string codec, optional<string> profile = nullopt);
 
 		void addH264Codec(int payloadType, optional<string> profile = DEFAULT_H264_VIDEO_PROFILE);
 		void addVP8Codec(int payloadType);

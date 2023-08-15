@@ -15,7 +15,8 @@
 #include <atomic>
 #include <chrono>
 
-namespace rtc::impl {
+namespace rtc {
+namespace impl {
 
 class LogCounter {
 private:
@@ -36,6 +37,6 @@ public:
 	LogCounter &operator++(int);
 };
 
-} // namespace rtc::impl
+} } // namespace rtc::impl
 
 #endif // RTC_SERVER_LOGCOUNTER_HPP

@@ -31,7 +31,8 @@
 
 #include <thread>
 
-namespace rtc::impl {
+namespace rtc {
+namespace impl {
 
 struct Init::TokenPayload {
 	TokenPayload(std::shared_future<void> *cleanupFuture) {
@@ -178,4 +179,4 @@ void Init::doCleanup() {
 #endif
 }
 
-} // namespace rtc::impl
+} } // namespace rtc::impl

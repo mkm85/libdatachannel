@@ -20,7 +20,8 @@
 #include <memory>
 #include <mutex>
 
-namespace rtc::impl {
+namespace rtc {
+namespace impl {
 
 class IceTransport;
 
@@ -56,10 +57,10 @@ protected:
 	const bool mIsClient;
 
 	Queue<message_ptr> mIncomingQueue;
-	std::atomic<int> mPendingRecvCount = 0;
+	std::atomic<int> mPendingRecvCount = { 0 };
 	std::mutex mRecvMutex;
-	std::atomic<unsigned int> mCurrentDscp = 0;
-	std::atomic<bool> mOutgoingResult = true;
+	std::atomic<unsigned int> mCurrentDscp = { 0 };
+	std::atomic<bool> mOutgoingResult = { true  };
 
 #if USE_GNUTLS
 	gnutls_session_t mSession;
@@ -118,6 +119,6 @@ protected:
 #endif
 };
 
-} // namespace rtc::impl
+} } // namespace rtc::impl
 
 #endif

@@ -11,7 +11,8 @@
 
 #if RTC_ENABLE_WEBSOCKET
 
-namespace rtc::impl {
+namespace rtc {
+namespace impl {
 
 VerifiedTlsTransport::VerifiedTlsTransport(
     variant<shared_ptr<TcpTransport>, shared_ptr<HttpProxyTransport>> lower, string host,
@@ -32,6 +33,6 @@ VerifiedTlsTransport::VerifiedTlsTransport(
 
 VerifiedTlsTransport::~VerifiedTlsTransport() { stop(); }
 
-} // namespace rtc::impl
+} } // namespace rtc::impl
 
 #endif

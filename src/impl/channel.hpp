@@ -15,7 +15,8 @@
 #include <atomic>
 #include <functional>
 
-namespace rtc::impl {
+namespace rtc {
+namespace impl {
 
 struct Channel {
 	virtual optional<message_variant> receive() = 0;
@@ -40,13 +41,13 @@ struct Channel {
 
 	synchronized_callback<message_variant> messageCallback;
 
-	std::atomic<size_t> bufferedAmount = 0;
-	std::atomic<size_t> bufferedAmountLowThreshold = 0;
+	std::atomic<size_t> bufferedAmount = {0};
+	std::atomic<size_t> bufferedAmountLowThreshold = {0};
 
 private:
-	std::atomic<bool> mOpenTriggered = false;
+	std::atomic<bool> mOpenTriggered = {false};
 };
 
-} // namespace rtc::impl
+} } // namespace rtc::impl
 
 #endif

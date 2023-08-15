@@ -17,3 +17,16 @@
 	path = deps/libsrtp
 	url = https://github.com/cisco/libsrtp.git
 	shallow = true
+[submodule "deps/optional"]
+	path = deps/optional
+	url = https://github.com/TartanLlama/optional.git
+	shallow = true
+[submodule "deps/string-view-lite"]
+	path = deps/string-view-lite
+	url = https://github.com/martinmoene/string-view-lite
+[submodule "deps/variant-lite"]
+	path = deps/variant-lite
+	url = https://github.com/martinmoene/variant-lite
+[submodule "deps/byte-lite"]
+	path = deps/byte-lite
+	url = https://github.com/martinmoene/byte-lite

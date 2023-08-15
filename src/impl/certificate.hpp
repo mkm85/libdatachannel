@@ -16,8 +16,10 @@
 
 #include <future>
 #include <tuple>
+#include <string>
 
-namespace rtc::impl {
+namespace rtc {
+namespace impl {
 
 class Certificate {
 public:
@@ -53,7 +55,7 @@ private:
 	const shared_ptr<EVP_PKEY> mPKey;
 #endif
 
-	const string mFingerprint;
+	const std::string mFingerprint;
 };
 
 #if USE_GNUTLS
@@ -70,6 +72,6 @@ using future_certificate_ptr = std::shared_future<certificate_ptr>;
 
 future_certificate_ptr make_certificate(CertificateType type = CertificateType::Default);
 
-} // namespace rtc::impl
+} } // namespace rtc::impl
 
 #endif

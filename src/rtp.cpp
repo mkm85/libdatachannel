@@ -35,7 +35,7 @@ bool IsRtcp(const binary &data) {
 	if (data.size() < 8)
 		return false;
 
-	uint8_t payloadType = std::to_integer<uint8_t>(data[1]) & 0x7F;
+	uint8_t payloadType = rtc::to_integer<uint8_t>(data[1]) & 0x7F;
 	PLOG_VERBOSE << "Demultiplexing RTCP and RTP with payload type, value=" << int(payloadType);
 
 	// RFC 5761 Multiplexing RTP and RTCP 4. Distinguishable RTP and RTCP Packets

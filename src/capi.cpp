@@ -846,8 +846,8 @@ int rtcReceiveMessage(int id, char *buffer, int *size) {
 		if (!message)
 			return RTC_ERR_NOT_AVAIL;
 
-		return std::visit( //
-		    overloaded{
+		return visit( //
+		    make_overloaded(
 		        [&](binary b) {
 			        int ret = copyAndReturn(std::move(b), buffer, *size);
 			        if (ret >= 0) {
@@ -875,8 +875,8 @@ int rtcReceiveMessage(int id, char *buffer, int *size) {
 				        *size = -int(s.size() + 1);
 				        return ret;
 			        }
-		        },
-		    },
+		        }
+			),
 		    *message);
 	});
 }

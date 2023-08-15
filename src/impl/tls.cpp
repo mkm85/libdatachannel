@@ -13,7 +13,8 @@
 
 #if USE_GNUTLS
 
-namespace rtc::gnutls {
+namespace rtc {
+namespace gnutls {
 
 // Return false on non-fatal error
 bool check(int ret, const string &message) {
@@ -66,7 +67,7 @@ gnutls_datum_t make_datum(char *data, size_t size) {
 	return datum;
 }
 
-} // namespace rtc::gnutls
+} } // namespace rtc::gnutls
 
 #elif USE_MBEDTLS
 
@@ -94,7 +95,8 @@ size_t my_strftme(char *buf, size_t size, const char *format, const time_t *t) {
 
 } // namespace
 
-namespace rtc::mbedtls {
+namespace rtc {
+namespace mbedtls {
 
 // Return false on non-fatal error
 bool check(int ret, const string &message) {
@@ -146,11 +148,12 @@ std::shared_ptr<mbedtls_x509_crt> new_x509_crt() {
 	                                         }};
 }
 
-} // namespace rtc::mbedtls
+} } // namespace rtc::mbedtls
 
 #else // OPENSSL
 
-namespace rtc::openssl {
+namespace rtc {
+namespace openssl {
 
 void init() {
 	static std::mutex mutex;
@@ -226,6 +229,6 @@ BIO *BIO_new_from_file(const string &filename) {
 	}
 }
 
-} // namespace rtc::openssl
+} } // namespace rtc::openssl
 
 #endif

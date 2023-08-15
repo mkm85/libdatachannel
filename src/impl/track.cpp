@@ -12,7 +12,8 @@
 #include "peerconnection.hpp"
 #include "rtp.hpp"
 
-namespace rtc::impl {
+namespace rtc {
+namespace impl {
 
 static LogCounter COUNTER_MEDIA_BAD_DIRECTION(plog::warning,
                                               "Number of media packets sent in invalid directions");
@@ -219,4 +220,4 @@ shared_ptr<MediaHandler> Track::getMediaHandler() {
 	return mMediaHandler;
 }
 
-} // namespace rtc::impl
+} } // namespace rtc::impl

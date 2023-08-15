@@ -26,7 +26,8 @@
 
 using namespace std::chrono;
 
-namespace rtc::impl {
+namespace rtc {
+namespace impl {
 
 void DtlsTransport::enqueueRecv() {
 	if (mPendingRecvCount > 0)
@@ -1083,4 +1084,4 @@ long DtlsTransport::BioMethodCtrl(BIO * /*bio*/, int cmd, long /*num*/, void * /
 
 #endif
 
-} // namespace rtc::impl
+} } // namespace rtc::impl

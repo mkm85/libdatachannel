@@ -18,7 +18,8 @@
 #include <functional>
 #include <memory>
 
-namespace rtc::impl {
+namespace rtc {
+namespace impl {
 
 class Transport {
 public:
@@ -52,9 +53,9 @@ private:
 	synchronized_callback<State> mStateChangeCallback;
 	synchronized_callback<message_ptr> mRecvCallback;
 
-	std::atomic<State> mState = State::Disconnected;
+	std::atomic<State> mState = { State::Disconnected };
 };
 
-} // namespace rtc::impl
+} } // namespace rtc::impl
 
 #endif

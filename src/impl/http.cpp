@@ -10,7 +10,8 @@
 
 #include <algorithm>
 
-namespace rtc::impl {
+namespace rtc {
+namespace impl {
 
 bool isHttpRequest(const byte *buffer, size_t size) {
 	// Check the buffer starts with a valid-looking HTTP method
@@ -63,4 +64,4 @@ std::multimap<string, string> parseHttpHeaders(const std::list<string> &lines) {
 	return headers;
 }
 
-} // namespace rtc::impl
+} } // namespace rtc::impl

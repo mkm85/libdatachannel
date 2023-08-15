@@ -17,7 +17,9 @@
 #include <random>
 #include <vector>
 
-namespace rtc::impl::utils {
+namespace rtc {
+namespace impl {
+namespace utils {
 
 std::vector<string> explode(const string &str, char delim);
 string implode(const std::vector<string> &tokens, char delim);
@@ -55,8 +57,8 @@ auto random_engine() {
 template <typename Generator = std::mt19937> auto random_bytes_engine() {
 	using char_independent_bits_engine =
 	    std::independent_bits_engine<Generator, CHAR_BIT, unsigned short>;
-	static_assert(char_independent_bits_engine::min() == std::numeric_limits<uint8_t>::min());
-	static_assert(char_independent_bits_engine::max() == std::numeric_limits<uint8_t>::max());
+	static_assert(char_independent_bits_engine::min() == std::numeric_limits<uint8_t>::min(), "");
+	static_assert(char_independent_bits_engine::max() == std::numeric_limits<uint8_t>::max(), "");
 	return random_engine<char_independent_bits_engine, uint8_t>();
 }
 
@@ -66,6 +68,6 @@ void set_name(const string &name);
 
 } // namespace this_thread
 
-} // namespace rtc::impl::utils
+} } } // namespace rtc::impl::utils
 
 #endif

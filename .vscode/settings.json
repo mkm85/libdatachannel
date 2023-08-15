@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "mutex": "cpp",
+        "tuple": "cpp",
+        "string_view": "cpp",
+        "variant": "cpp"
+    }
+}

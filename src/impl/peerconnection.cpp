@@ -32,7 +32,8 @@
 
 using namespace std::placeholders;
 
-namespace rtc::impl {
+namespace rtc {
+namespace impl {
 
 static LogCounter COUNTER_MEDIA_TRUNCATED(plog::warning,
                                           "Number of truncated RTP packets over past second");
@@ -792,7 +793,7 @@ void PeerConnection::validateRemoteDescription(const Description &description) {
 
 	int activeMediaCount = 0;
 	for (unsigned int i = 0; i < description.mediaCount(); ++i)
-		std::visit(rtc::overloaded{[&](const Description::Application *application) {
+		visit(make_overloaded([&](const Description::Application *application) {
 			                           if (!application->isRemoved())
 				                           ++activeMediaCount;
 		                           },
@@ -800,7 +801,7 @@ void PeerConnection::validateRemoteDescription(const Description &description) {
 			                           if (!media->isRemoved() ||
 			                               media->direction() != Description::Direction::Inactive)
 				                           ++activeMediaCount;
-		                           }},
+		                           }),
 		           description.media(i));
 
 	if (activeMediaCount == 0)
@@ -825,8 +826,8 @@ void PeerConnection::processLocalDescription(Description description) {
 	if (auto remote = remoteDescription()) {
 		// Reciprocate remote description
 		for (unsigned int i = 0; i < remote->mediaCount(); ++i)
-			std::visit( // reciprocate each media
-			    rtc::overloaded{
+			visit( // reciprocate each media
+			    make_overloaded(
 			        [&](Description::Application *remoteApp) {
 				        std::shared_lock lock(mDataChannelsMutex);
 				        if (!mDataChannels.empty() || !mUnassignedDataChannels.empty()) {
@@ -901,8 +902,8 @@ void PeerConnection::processLocalDescription(Description description) {
 					        track->close();
 
 				        description.addMedia(track->description());
-			        },
-			    },
+			        }
+				),
 			    remote->media(i));
 
 		// We need to update the SSRC cache for newly-created incoming tracks
@@ -1217,8 +1218,8 @@ void PeerConnection::updateTrackSsrcCache(const Description &description) {
 
 	// Setup SSRC -> Track mapping
 	for (unsigned int i = 0; i < description.mediaCount(); ++i)
-		std::visit( // ssrc -> track mapping
-		    rtc::overloaded{
+		visit( // ssrc -> track mapping
+		    make_overloaded(
 		        [&](Description::Application const *) { return; },
 		        [&](Description::Media const *media) {
 			        const auto ssrcs = media->getSSRCs();
@@ -1242,9 +1243,9 @@ void PeerConnection::updateTrackSsrcCache(const Description &description) {
 			        for (auto ssrc : ssrcs) {
 				        mTracksBySsrc.insert_or_assign(ssrc, track);
 			        }
-		        },
-		    },
+		        }
+			),
 		    description.media(i));
 }
 
-} // namespace rtc::impl
+} } // namespace rtc::impl

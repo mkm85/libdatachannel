@@ -8,7 +8,8 @@
 
 #include "processor.hpp"
 
-namespace rtc::impl {
+namespace rtc {
+namespace impl {
 
 Processor::Processor(size_t limit) : mTasks(limit) {}
 
@@ -39,4 +40,4 @@ TearDownProcessor::TearDownProcessor() {}
 
 TearDownProcessor::~TearDownProcessor() {}
 
-} // namespace rtc::impl
+} } // namespace rtc::impl

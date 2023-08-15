@@ -13,12 +13,13 @@
 
 #include "common.hpp"
 
-namespace rtc::impl {
+namespace rtc {
+namespace impl {
 
 binary Sha1(const binary &input);
 binary Sha1(const string &input);
 
-} // namespace rtc::impl
+} } // namespace rtc::impl
 
 #endif
 

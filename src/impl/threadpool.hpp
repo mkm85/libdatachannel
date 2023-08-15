@@ -25,10 +25,11 @@
 #include <thread>
 #include <vector>
 
-namespace rtc::impl {
+namespace rtc {
+namespace impl {
 
-template <class F, class... Args>
-using invoke_future_t = std::future<std::invoke_result_t<std::decay_t<F>, std::decay_t<Args>...>>;
+//template <class F, class... Args>
+//using invoke_future_t = std::future<std::invoke_result_t<std::decay_t<F>, std::decay_t<Args>...>>;
 
 class ThreadPool final {
 public:
@@ -49,15 +50,13 @@ public:
 	bool runOne();
 
 	template <class F, class... Args>
-	auto enqueue(F &&f, Args &&...args) noexcept -> invoke_future_t<F, Args...>;
+	auto enqueue(F &&f, Args &&...args) noexcept;
 
 	template <class F, class... Args>
-	auto schedule(clock::duration delay, F &&f, Args &&...args) noexcept
-	    -> invoke_future_t<F, Args...>;
+	auto schedule(clock::duration delay, F &&f, Args &&...args) noexcept;
 
 	template <class F, class... Args>
-	auto schedule(clock::time_point time, F &&f, Args &&...args) noexcept
-	    -> invoke_future_t<F, Args...>;
+	auto schedule(clock::time_point time, F &&f, Args &&...args) noexcept;
 
 private:
 	ThreadPool();
@@ -66,8 +65,8 @@ private:
 	std::function<void()> dequeue(); // returns null function if joining
 
 	std::vector<std::thread> mWorkers;
-	std::atomic<int> mBusyWorkers = 0;
-	std::atomic<bool> mJoining = false;
+	std::atomic<int> mBusyWorkers = { 0 };
+	std::atomic<bool> mJoining = { false };
 
 	struct Task {
 		clock::time_point time;
@@ -82,20 +81,18 @@ private:
 };
 
 template <class F, class... Args>
-auto ThreadPool::enqueue(F &&f, Args &&...args) noexcept -> invoke_future_t<F, Args...> {
+auto ThreadPool::enqueue(F &&f, Args &&...args) noexcept {
 	return schedule(clock::now(), std::forward<F>(f), std::forward<Args>(args)...);
 }
 
 template <class F, class... Args>
-auto ThreadPool::schedule(clock::duration delay, F &&f, Args &&...args) noexcept
-    -> invoke_future_t<F, Args...> {
+auto ThreadPool::schedule(clock::duration delay, F &&f, Args &&...args) noexcept {
 	return schedule(clock::now() + delay, std::forward<F>(f), std::forward<Args>(args)...);
 }
 
 template <class F, class... Args>
-auto ThreadPool::schedule(clock::time_point time, F &&f, Args &&...args) noexcept
-    -> invoke_future_t<F, Args...> {
-	std::unique_lock lock(mMutex);
+auto ThreadPool::schedule(clock::time_point time, F &&f, Args &&...args) noexcept {
+	std::unique_lock<std::mutex> lock(mMutex);
 	using R = std::invoke_result_t<std::decay_t<F>, std::decay_t<Args>...>;
 	auto bound = std::bind(std::forward<F>(f), std::forward<Args>(args)...);
 	auto task = std::make_shared<std::packaged_task<R()>>([bound = std::move(bound)]() mutable {
@@ -113,6 +110,6 @@ auto ThreadPool::schedule(clock::time_point time, F &&f, Args &&...args) noexcep
 	return result;
 }
 
-} // namespace rtc::impl
+} } // namespace rtc::impl
 
 #endif

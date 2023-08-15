@@ -14,7 +14,8 @@
 
 #if RTC_ENABLE_WEBSOCKET
 
-namespace rtc::impl {
+namespace rtc {
+namespace impl {
 
 // Utility class to interrupt poll()
 class PollInterrupter final {
@@ -37,7 +38,7 @@ private:
 #endif
 };
 
-} // namespace rtc::impl
+} } // namespace rtc::impl
 
 #endif
 

@@ -19,7 +19,8 @@
 #include <unistd.h>
 #endif
 
-namespace rtc::impl {
+namespace rtc {
+namespace impl {
 
 TcpServer::TcpServer(uint16_t port, const char* bindAddress) {
 	PLOG_DEBUG << "Initializing TCP server";
@@ -185,6 +186,6 @@ void TcpServer::listen(uint16_t port, const char* bindAddress) {
 	freeaddrinfo(result);
 }
 
-} // namespace rtc::impl
+} } // namespace rtc::impl
 
 #endif

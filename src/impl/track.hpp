@@ -22,7 +22,8 @@
 #include <atomic>
 #include <shared_mutex>
 
-namespace rtc::impl {
+namespace rtc {
+namespace impl {
 
 struct PeerConnection;
 
@@ -68,11 +69,11 @@ private:
 
 	mutable std::shared_mutex mMutex;
 
-	std::atomic<bool> mIsClosed = false;
+	std::atomic<bool> mIsClosed = { false };
 
 	Queue<message_ptr> mRecvQueue;
 };
 
-} // namespace rtc::impl
+} } // namespace rtc::impl
 
 #endif

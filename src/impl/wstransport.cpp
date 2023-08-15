@@ -37,7 +37,8 @@
 #define ntohll(x) htonll(x)
 #endif
 
-namespace rtc::impl {
+namespace rtc {
+namespace impl {
 
 using std::to_integer;
 using std::to_string;
@@ -48,12 +49,12 @@ WsTransport::WsTransport(
         lower,
     shared_ptr<WsHandshake> handshake, int maxOutstandingPings, message_callback recvCallback,
     state_callback stateCallback)
-    : Transport(std::visit([](auto l) { return std::static_pointer_cast<Transport>(l); }, lower),
+    : Transport(visit(make_overloaded([](auto l) { return std::static_pointer_cast<Transport>(l); }), lower),
                 std::move(stateCallback)),
       mHandshake(std::move(handshake)),
       mIsClient(
-          std::visit(rtc::overloaded{[](auto l) { return l->isActive(); },
-                                     [](shared_ptr<TlsTransport> l) { return l->isClient(); }},
+          visit(make_overloaded([](auto l) { return l->isActive(); },
+                                     [](shared_ptr<TlsTransport> l) { return l->isClient(); }),
                      lower)),
       mMaxOutstandingPings(maxOutstandingPings) {
 
@@ -388,6 +389,6 @@ void WsTransport::addOutstandingPing() {
 	}
 }
 
-} // namespace rtc::impl
+} } // namespace rtc::impl
 
 #endif

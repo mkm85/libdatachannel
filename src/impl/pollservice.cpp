@@ -15,7 +15,8 @@
 #include <algorithm>
 #include <cassert>
 
-namespace rtc::impl {
+namespace rtc {
+namespace impl {
 
 using namespace std::chrono_literals;
 using std::chrono::duration_cast;
@@ -222,6 +223,6 @@ std::ostream &operator<<(std::ostream &out, PollService::Direction direction) {
 	return out << str;
 }
 
-} // namespace rtc::impl
+} } // namespace rtc::impl
 
 #endif

@@ -26,7 +26,8 @@
 
 using std::chrono::milliseconds;
 
-namespace rtc::impl {
+namespace rtc {
+namespace impl {
 
 // Messages for the DataChannel establishment protocol (RFC 8832)
 // See https://www.rfc-editor.org/rfc/rfc8832.html
@@ -355,4 +356,4 @@ void IncomingDataChannel::processOpenMessage(message_ptr message) {
 		triggerOpen();
 }
 
-} // namespace rtc::impl
+} } // namespace rtc::impl

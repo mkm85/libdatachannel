@@ -20,7 +20,8 @@
 #include <atomic>
 #include <thread>
 
-namespace rtc::impl {
+namespace rtc {
+namespace impl {
 
 class TcpTransport;
 class HttpProxyTransport;
@@ -95,7 +96,7 @@ protected:
 #endif
 };
 
-} // namespace rtc::impl
+} } // namespace rtc::impl
 
 #endif
 

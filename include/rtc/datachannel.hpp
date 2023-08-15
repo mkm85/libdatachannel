@@ -57,7 +57,9 @@ template <typename Buffer> std::pair<const byte *, size_t> to_bytes(const Buffer
 }
 
 template <typename Buffer> bool DataChannel::sendBuffer(const Buffer &buf) {
-	auto [bytes, size] = to_bytes(buf);
+	rtc::byte* bytes;
+	size_t size;
+	std::tie(bytes, size) = to_bytes(buf);
 	return send(bytes, size);
 }
 
@@ -69,7 +71,9 @@ template <typename Iterator> bool DataChannel::sendBuffer(Iterator first, Iterat
 	binary buffer(size);
 	byte *pos = buffer.data();
 	for (Iterator it = first; it != last; ++it) {
-		auto [bytes, len] = to_bytes(*it);
+		byte *bytes;
+		size_t len;
+		std::tie(bytes, len) = to_bytes(*it);
 		pos = std::copy(bytes, bytes + len, pos);
 	}
 	return send(std::move(buffer));

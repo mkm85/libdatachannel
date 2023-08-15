@@ -22,7 +22,8 @@
 
 #include <atomic>
 
-namespace rtc::impl {
+namespace rtc {
+namespace impl {
 
 struct ProfileParams {
 	srtp_profile_t srtpProfile;
@@ -53,13 +54,13 @@ private:
 
 	message_callback mSrtpRecvCallback;
 	srtp_t mSrtpIn, mSrtpOut;
-	std::atomic<bool> mInitDone = false;
+	std::atomic<bool> mInitDone = { false };
 	std::vector<unsigned char> mClientSessionKey;
 	std::vector<unsigned char> mServerSessionKey;
 	std::mutex sendMutex;
 };
 
-} // namespace rtc::impl
+} } // namespace rtc::impl
 
 #endif
 

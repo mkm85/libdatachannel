@@ -12,15 +12,61 @@
 #include <functional>
 #include <memory>
 #include <mutex>
+
+#if defined(HAVE_CXX17_OPTIONAL)
 #include <optional>
+#else
+#include "tl/optional.hpp"
+#endif
+
 #include <tuple>
 #include <utility>
 
 namespace rtc {
 
-// overloaded helper
-template <class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
-template <class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
+#if defined(HAVE_CXX17_OPTIONAL)
+using std::optional;
+#else
+using tl::optional;
+#endif
+
+// https://stackoverflow.com/a/32476942
+template <class... Fs>
+struct overloaded;
+
+template <class F0, class... Frest>
+struct overloaded<F0, Frest...> : F0, overloaded<Frest...>
+{
+    overloaded(F0 f0, Frest... rest) : F0(f0), overloaded<Frest...>(rest...) {}
+
+    using F0::operator();
+    using overloaded<Frest...>::operator();
+};
+
+template <class F0>
+struct overloaded<F0> : F0
+{
+    overloaded(F0 f0) : F0(f0) {}
+
+    using F0::operator();
+};
+
+template <class... Fs>
+auto make_overloaded(Fs... fs)
+{
+    return overloaded<Fs...>(fs...);
+}
+
+template<int ...>
+struct seq { };
+
+template<int N, int ...S>
+struct gens : gens<N-1, N-1, S...> { };
+
+template<int ...S>
+struct gens<0, S...> {
+  typedef seq<S...> type;
+};
 
 // weak_ptr bind helper
 template <typename F, typename T, typename... Args> auto weak_bind(F &&f, T *t, Args &&..._args) {
@@ -31,6 +77,7 @@ template <typename F, typename T, typename... Args> auto weak_bind(F &&f, T *t, 
 			return static_cast<decltype(bound(args...))>(false);
 	};
 }
+
 
 // scope_guard helper
 class scope_guard final {
@@ -59,30 +106,36 @@ public:
 	virtual ~synchronized_callback() { *this = nullptr; }
 
 	synchronized_callback &operator=(synchronized_callback &&cb) {
-		std::scoped_lock lock(mutex, cb.mutex);
+		std::lock(mutex, cb.mutex);
+        std::lock_guard<std::recursive_mutex> lk1(mutex, std::adopt_lock);
+        std::lock_guard<std::recursive_mutex> lk2(cb.mutex, std::adopt_lock);
+		//std::scoped_lock lock(mutex, cb.mutex);
 		set(std::exchange(cb.callback, nullptr));
 		return *this;
 	}
 
 	synchronized_callback &operator=(const synchronized_callback &cb) {
-		std::scoped_lock lock(mutex, cb.mutex);
+		std::lock(mutex, cb.mutex);
+        std::lock_guard<std::recursive_mutex> lk1(mutex, std::adopt_lock);
+        std::lock_guard<std::recursive_mutex> lk2(cb.mutex, std::adopt_lock);
+		//std::scoped_lock lock(mutex, cb.mutex);
 		set(cb.callback);
 		return *this;
 	}
 
 	synchronized_callback &operator=(std::function<void(Args...)> func) {
-		std::lock_guard lock(mutex);
+		std::lock_guard<std::recursive_mutex> lock(mutex);
 		set(std::move(func));
 		return *this;
 	}
 
 	bool operator()(Args... args) const {
-		std::lock_guard lock(mutex);
+		std::lock_guard<std::recursive_mutex> lock(mutex);
 		return call(std::move(args)...);
 	}
 
 	operator bool() const {
-		std::lock_guard lock(mutex);
+		std::lock_guard<std::recursive_mutex> lock(mutex);
 		return callback ? true : false;
 	}
 
@@ -113,10 +166,19 @@ private:
 	void set(std::function<void(Args...)> func) {
 		synchronized_callback<Args...>::set(func);
 		if (func && stored) {
-			std::apply(func, std::move(*stored));
+			func_dispatch(func);
 			stored.reset();
 		}
 	}
+
+	void func_dispatch(std::function<void(Args...)> func) {
+    	call_func(typename gens<sizeof...(Args)>::type(), func);
+  	}
+
+	template<int ...S>
+  	void call_func(seq<S...>, std::function<void(Args...)> func) {
+    	func(std::get<S>(*stored) ...);
+  	}
 
 	bool call(Args... args) const {
 		if (!synchronized_callback<Args...>::call(args...))
@@ -125,7 +187,7 @@ private:
 		return true;
 	}
 
-	mutable std::optional<std::tuple<Args...>> stored;
+	mutable optional<std::tuple<Args...>> stored;
 };
 
 // pimpl base class

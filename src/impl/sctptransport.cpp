@@ -70,7 +70,8 @@ template <typename T> uint32_t to_uint32(T i) {
 
 } // namespace
 
-namespace rtc::impl {
+namespace rtc {
+namespace impl {
 
 static LogCounter COUNTER_UNKNOWN_PPID(plog::warning,
                                        "Number of SCTP packets received with an unknown PPID");
@@ -974,4 +975,4 @@ void SctpTransport::DebugCallback(const char *format, ...) {
 	PLOG_VERBOSE << "usrsctp: " << buffer; // usrsctp debug as verbose
 }
 
-} // namespace rtc::impl
+} } // namespace rtc::impl

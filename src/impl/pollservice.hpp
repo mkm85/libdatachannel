@@ -23,7 +23,8 @@
 #include <unordered_map>
 #include <vector>
 
-namespace rtc::impl {
+namespace rtc {
+namespace impl {
 
 class PollService {
 public:
@@ -75,7 +76,7 @@ private:
 
 std::ostream &operator<<(std::ostream &out, PollService::Direction direction);
 
-} // namespace rtc::impl
+} } // namespace rtc::impl
 
 #endif
 

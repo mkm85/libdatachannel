@@ -19,7 +19,8 @@
 
 #include <chrono>
 
-namespace rtc::impl {
+namespace rtc {
+namespace impl {
 
 using namespace std::placeholders;
 using namespace std::chrono_literals;
@@ -444,6 +445,6 @@ void TcpTransport::process(PollService::Event event) {
 	recv(nullptr);
 }
 
-} // namespace rtc::impl
+} } // namespace rtc::impl
 
 #endif

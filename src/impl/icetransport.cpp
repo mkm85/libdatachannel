@@ -31,7 +31,8 @@
 using namespace std::chrono_literals;
 using std::chrono::system_clock;
 
-namespace rtc::impl {
+namespace rtc {
+namespace impl {
 
 #if !USE_NICE // libjuice
 
@@ -891,4 +892,4 @@ bool IceTransport::getSelectedCandidatePair(Candidate *local, Candidate *remote)
 
 #endif
 
-} // namespace rtc::impl
+} } // namespace rtc::impl

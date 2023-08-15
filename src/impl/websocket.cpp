@@ -28,7 +28,8 @@
 #include <winsock2.h>
 #endif
 
-namespace rtc::impl {
+namespace rtc {
+namespace impl {
 
 using namespace std::placeholders;
 using namespace std::chrono_literals;
@@ -515,6 +516,6 @@ void WebSocket::scheduleConnectionTimeout() {
 	}
 }
 
-} // namespace rtc::impl
+} } // namespace rtc::impl
 
 #endif

@@ -17,7 +17,8 @@
 
 #include <atomic>
 
-namespace rtc::impl {
+namespace rtc {
+namespace impl {
 
 class HttpProxyTransport;
 class TcpTransport;
@@ -80,7 +81,7 @@ private:
 	std::atomic<bool> mCloseSent = false;
 };
 
-} // namespace rtc::impl
+} } // namespace rtc::impl
 
 #endif
 

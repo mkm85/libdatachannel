@@ -25,7 +25,8 @@
 #include <unordered_map>
 #include <vector>
 
-namespace rtc::impl {
+namespace rtc {
+namespace impl {
 
 struct PeerConnection : std::enable_shared_from_this<PeerConnection> {
 	using State = rtc::PeerConnection::State;
@@ -107,11 +108,11 @@ struct PeerConnection : std::enable_shared_from_this<PeerConnection> {
 	}
 
 	const Configuration config;
-	std::atomic<State> state = State::New;
-	std::atomic<GatheringState> gatheringState = GatheringState::New;
-	std::atomic<SignalingState> signalingState = SignalingState::Stable;
-	std::atomic<bool> negotiationNeeded = false;
-	std::atomic<bool> closing = false;
+	std::atomic<State> state = { State::New };
+	std::atomic<GatheringState> gatheringState = { GatheringState::New };
+	std::atomic<SignalingState> signalingState = { SignalingState::Stable };
+	std::atomic<bool> negotiationNeeded = { false };
+	std::atomic<bool> closing = { false };
 	std::mutex signalingMutex;
 
 	synchronized_callback<shared_ptr<rtc::DataChannel>> dataChannelCallback;
@@ -154,6 +155,6 @@ private:
 	Queue<shared_ptr<Track>> mPendingTracks;
 };
 
-} // namespace rtc::impl
+} } // namespace rtc::impl
 
 #endif

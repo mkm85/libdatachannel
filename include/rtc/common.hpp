@@ -48,22 +48,83 @@
 #include <functional>
 #include <memory>
 #include <mutex>
+
+#if defined(HAVE_CXX17_OPTIONAL)
 #include <optional>
+#else
+#include "tl/optional.hpp"
+#endif
+
 #include <string>
+
+#if defined(HAVE_CXX17_STRING_VIEW)
 #include <string_view>
+#else
+#include "nonstd/string_view.hpp"
+#endif
+
+#if defined(HAVE_CXX17_VARIANT)
 #include <variant>
+#else
+#include "nonstd/variant.hpp"
+#endif
+
+#if defined(HAVE_CXX17_BYTE)
+#include <cstddef>
+#else
+#include "nonstd/byte.hpp"
+#endif
+
+
 #include <vector>
 
 namespace rtc {
 
+#if defined(HAVE_CXX17_BYTE)
 using std::byte;
+#else
+using nonstd::byte;
+#endif
+
+#if defined(HAVE_CXX17_OPTIONAL)
+using std::make_optional;
 using std::nullopt;
 using std::optional;
+#else
+using tl::nullopt;
+using tl::optional;
+using tl::make_optional;
+#endif
+
 using std::shared_ptr;
 using std::string;
+
+#if defined(HAVE_CXX17_STRING_VIEW)
 using std::string_view;
+#else
+using nonstd::string_view;
+#endif
+
 using std::unique_ptr;
+
+#if defined(HAVE_CXX17_VARIANT)
 using std::variant;
+using std::visit;
+#else
+using nonstd::variant;
+using nonstd::visit;
+#endif
+
+#if defined(HAVE_CXX17_BYTE)
+//namespace lib {
+using std::to_integer;
+//}
+#else
+//namespace lib {
+using nonstd::to_integer;
+//}
+#endif
+
 using std::weak_ptr;
 
 using binary = std::vector<byte>;

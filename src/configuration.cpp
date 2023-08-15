@@ -15,7 +15,7 @@
 
 namespace {
 
-bool parse_url(const std::string &url, std::vector<std::optional<std::string>> &result) {
+bool parse_url(const std::string &url, std::vector<rtc::optional<std::string>> &result) {
 	// Modified regex from RFC 3986, see https://www.rfc-editor.org/rfc/rfc3986.html#appendix-B
 	static const char *rs =
 	    R"(^(([^:.@/?#]+):)?(/{0,2}((([^:@]*)(:([^@]*))?)@)?(([^:/?#]*)(:([^/?#]*))?))?([^?#]*)(\?([^#]*))?(#(.*))?)";
@@ -27,7 +27,7 @@ bool parse_url(const std::string &url, std::vector<std::optional<std::string>> &
 
 	result.resize(m.size());
 	std::transform(m.begin(), m.end(), result.begin(), [](const auto &sm) {
-		return sm.length() > 0 ? std::make_optional(std::string(sm)) : std::nullopt;
+		return sm.length() > 0 ? rtc::make_optional(std::string(sm)) : rtc::nullopt;
 	});
 
 	assert(result.size() == 18);

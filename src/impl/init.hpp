@@ -16,9 +16,10 @@
 #include <future>
 #include <mutex>
 
-namespace rtc::impl {
+namespace rtc {
+namespace impl {
 
-using init_token = shared_ptr<void>;
+typedef shared_ptr<void> init_token;
 
 class Init {
 public:
@@ -41,7 +42,7 @@ private:
 	void doInit();
 	void doCleanup();
 
-	std::optional<shared_ptr<void>> mGlobal;
+	optional<shared_ptr<void>> mGlobal;
 	weak_ptr<void> mWeak;
 	bool mInitialized = false;
 	SctpSettings mCurrentSctpSettings = {};
@@ -51,6 +52,6 @@ private:
 	struct TokenPayload;
 };
 
-} // namespace rtc::impl
+} } // namespace rtc::impl
 
 #endif

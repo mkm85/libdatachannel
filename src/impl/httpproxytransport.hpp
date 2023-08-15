@@ -15,7 +15,8 @@
 
 #if RTC_ENABLE_WEBSOCKET
 
-namespace rtc::impl {
+namespace rtc {
+namespace impl {
 
 class TcpTransport;
 
@@ -43,7 +44,7 @@ private:
 	binary mBuffer;
 };
 
-} // namespace rtc::impl
+} } // namespace rtc::impl
 
 #endif
 

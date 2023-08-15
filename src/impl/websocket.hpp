@@ -26,7 +26,8 @@
 #include <atomic>
 #include <thread>
 
-namespace rtc::impl {
+namespace rtc {
+namespace impl {
 
 struct WebSocket final : public Channel, public std::enable_shared_from_this<WebSocket> {
 	using State = rtc::WebSocket::State;
@@ -86,7 +87,7 @@ private:
 	Queue<message_ptr> mRecvQueue;
 };
 
-} // namespace rtc::impl
+} } // namespace rtc::impl
 
 #endif
 

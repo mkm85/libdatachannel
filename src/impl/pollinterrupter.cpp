@@ -16,7 +16,8 @@
 #include <unistd.h>
 #endif
 
-namespace rtc::impl {
+namespace rtc {
+namespace impl {
 
 PollInterrupter::PollInterrupter() {
 #ifdef _WIN32
@@ -120,6 +121,6 @@ void PollInterrupter::interrupt() {
 #endif
 }
 
-} // namespace rtc::impl
+} } // namespace rtc::impl
 
 #endif
