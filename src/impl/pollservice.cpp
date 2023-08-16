@@ -85,9 +85,7 @@ void PollService::prepare(std::vector<struct pollfd> &pfds, optional<clock::time
 
 	auto it = pfds.begin();
 	mInterrupter->prepare(*it++);
-	socket_t sock;
-	SocketEntry entry;
-	for (auto const data : *mSocks) {
+	for (auto const& data : *mSocks) {
 		socket_t sock = data.first;
 		SocketEntry entry = data.second;
 

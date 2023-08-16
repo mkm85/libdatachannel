@@ -71,7 +71,13 @@ struct gens<0, S...> {
 #if defined(HAVE_CXX17_WEAK_FROM_THIS)
 template <class C> std::weak_ptr<C> weak_from_this(C *c) { return c->weak_from_this(); }
 #else
-template <class C> std::weak_ptr<C> weak_from_this(C *c) { return c->shared_from_this(); }
+template <class C> std::weak_ptr<C> weak_from_this(C *c) {
+	try {
+		return c->shared_from_this();
+	} catch (std::bad_weak_ptr const&) {
+		return std::weak_ptr<C>();
+	}
+}
 #endif
 
 // weak_ptr bind helper

@@ -724,10 +724,11 @@ shared_ptr<Track> PeerConnection::emplaceTrack(Description::Media description) {
 
 	shared_ptr<Track> track;
 	auto it = mTracks.find(description.mid());
-	if (it != mTracks.end())
+	if (it != mTracks.end()) {
 		track = it->second.lock();
 		if (track)
 			track->setDescription(std::move(description));
+	}
 
 	if (!track) {
 		track = std::make_shared<Track>(rtc::weak_from_this(this), std::move(description));

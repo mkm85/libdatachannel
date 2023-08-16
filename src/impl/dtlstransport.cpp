@@ -33,7 +33,7 @@ void DtlsTransport::enqueueRecv() {
 	if (mPendingRecvCount > 0)
 		return;
 
-	if (auto shared_this = shared_from_this()) {
+	if (auto shared_this = rtc::weak_from_this(this).lock()) {
 		++mPendingRecvCount;
 		ThreadPool::Instance().enqueue(&DtlsTransport::doRecv, std::move(shared_this));
 	}

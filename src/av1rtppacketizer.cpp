@@ -135,7 +135,7 @@ std::vector<binary_ptr> AV1RtpPacketizer::packetizeObu(binary_ptr message,
 
 	size_t messageRemaining = message->size();
 	while (messageRemaining > 0) {
-		auto obuCount = 1;
+		uint8_t obuCount = 1;
 		auto metadataSize = payloadHeaderSize;
 
 		if (sequenceHeader != nullptr) {
@@ -147,12 +147,12 @@ std::vector<binary_ptr> AV1RtpPacketizer::packetizeObu(binary_ptr message,
 		    std::min(size_t(maximumFragmentSize), messageRemaining + metadataSize));
 		auto payloadOffset = payloadHeaderSize;
 
-		payload->at(0) = byte{obuCount} << wBitshift;
+		payload->at(0) = to_byte(obuCount) << wBitshift;
 
 		// Packetize cached SequenceHeader
 		if (obuCount == 2) {
 			payload->at(0) ^= nMask;
-			payload->at(1) = byte{sequenceHeader->size() & sevenLsbBitmask};
+			payload->at(1) = to_byte(sequenceHeader->size() & sevenLsbBitmask);
 			payloadOffset += oneByteLeb128Size;
 
 			std::memcpy(payload->data() + payloadOffset, sequenceHeader->data(),
