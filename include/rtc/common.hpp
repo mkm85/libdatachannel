@@ -49,7 +49,7 @@
 #include <memory>
 #include <mutex>
 
-#if defined(HAVE_CXX17_OPTIONAL)
+#if defined(HAVE_CXX17)
 #include <optional>
 #else
 #include "tl/optional.hpp"
@@ -57,25 +57,25 @@
 
 #include <string>
 
-#if defined(HAVE_CXX17_STRING_VIEW)
+#if defined(HAVE_CXX17)
 #include <string_view>
 #else
 #include "nonstd/string_view.hpp"
 #endif
 
-#if defined(HAVE_CXX17_VARIANT)
+#if defined(HAVE_CXX17)
 #include <variant>
 #else
 #include "nonstd/variant.hpp"
 #endif
 
-#if defined(HAVE_CXX17_BYTE)
+#if defined(HAVE_CXX17)
 #include <cstddef>
 #else
 #include "nonstd/byte.hpp"
 #endif
 
-#if defined(HAVE_CXX17_SHARED_MUTEX)
+#if defined(HAVE_CXX17)
 #include <shared_mutex>
 #else
 #include "sm/shared_mutex.hpp"
@@ -85,13 +85,13 @@
 
 namespace rtc {
 
-#if defined(HAVE_CXX17_BYTE)
+#if defined(HAVE_CXX17)
 using std::byte;
 #else
 using nonstd::byte;
 #endif
 
-#if defined(HAVE_CXX17_OPTIONAL)
+#if defined(HAVE_CXX17)
 using std::make_optional;
 using std::nullopt;
 using std::optional;
@@ -104,7 +104,7 @@ using tl::make_optional;
 using std::shared_ptr;
 using std::string;
 
-#if defined(HAVE_CXX17_STRING_VIEW)
+#if defined(HAVE_CXX17)
 using std::string_view;
 #else
 using nonstd::string_view;
@@ -112,7 +112,7 @@ using nonstd::string_view;
 
 using std::unique_ptr;
 
-#if defined(HAVE_CXX17_VARIANT)
+#if defined(HAVE_CXX17)
 using std::get;
 using std::holds_alternative;
 using std::variant;
@@ -124,10 +124,10 @@ using nonstd::variant;
 using nonstd::visit;
 #endif
 
-#if defined(HAVE_CXX17_BYTE)
+#if defined(HAVE_CXX17)
 //namespace lib {
 using std::to_integer;
-template <class I> inline byte to_byte(I i) { return i; }
+template <class I> inline byte to_byte(I i) { return std::byte(i); }
 //}
 #else
 //namespace lib {
@@ -136,7 +136,7 @@ using nonstd::to_byte;
 //}
 #endif
 
-#if defined(HAVE_CXX17_SHARED_MUTEX)
+#if defined(HAVE_CXX17)
 using std::shared_mutex;
 #else
 using sm::shared_mutex;

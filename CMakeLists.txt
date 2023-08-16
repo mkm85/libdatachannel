@@ -53,43 +53,18 @@ set(BUILD_SHARED_LIBS OFF) # to force usrsctp to be built static
 
 
 
-CHECK_INCLUDE_FILE_CXX("optional" HAVE_CXX17_OPTIONAL)
-CHECK_INCLUDE_FILE_CXX("string_view" HAVE_CXX17_STRING_VIEW)
-CHECK_INCLUDE_FILE_CXX("variant" HAVE_CXX17_VARIANT)
+CHECK_INCLUDE_FILE_CXX("optional" HAVE_CXX17)
 
 # TODO check for cxx17 byte
 
-if (HAVE_CXX17_OPTIONAL)
-	add_definitions(-DHAVE_CXX17_OPTIONAL)
+if (HAVE_CXX17)
 else()
 	include_directories(${CMAKE_CURRENT_SOURCE_DIR}/deps/optional/include)
-endif()
-
-if (HAVE_CXX17_STRING_VIEW)
-	add_definitions(-DHAVE_CXX17_STRING_VIEW)
-else()
 	include_directories(${CMAKE_CURRENT_SOURCE_DIR}/deps/string-view-lite/include)
-endif()
-
-
-if (HAVE_CXX17_VARIANT)
-	add_definitions(-DHAVE_CXX17_VARIANT)
-else()
 	include_directories(${CMAKE_CURRENT_SOURCE_DIR}/deps/variant-lite/include)
-endif()
-
-if (HAVE_CXX17_BYTE)
-	add_definitions(-DHAVE_CXX17_BYTE)
-else()
 	include_directories(${CMAKE_CURRENT_SOURCE_DIR}/deps/byte-lite/include)
-endif()
-
-if (HAVE_CXX17_SHARED_MUTEX)
-	add_definitions(-DHAVE_CXX17_SHARED_MUTEX)
-else()
 	include_directories(${CMAKE_CURRENT_SOURCE_DIR}/deps/shared_mutex/include)
 endif()
-
 
 if(WIN32)
 	add_definitions(-DWIN32_LEAN_AND_MEAN)
@@ -326,11 +301,22 @@ set_target_properties(datachannel-static PROPERTIES
 target_compile_definitions(datachannel-static PRIVATE RTC_EXPORTS)
 target_compile_definitions(datachannel-static PUBLIC RTC_STATIC)
 
+if (HAVE_CXX17)
+	target_compile_definitions(datachannel PUBLIC HAVE_CXX17)
+	target_compile_definitions(datachannel-static PUBLIC HAVE_CXX17)
+endif()
+
+
 target_include_directories(datachannel PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>)
 target_include_directories(datachannel PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include/rtc)
 target_include_directories(datachannel PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+#target_include_directories(datachannel PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/deps/optional/include)
+#target_include_directories(datachannel PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/deps/string-view-lite/include)
+#target_include_directories(datachannel PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/deps/variant-lite/include)
+#target_include_directories(datachannel PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/deps/shared_mutex/include)
+#target_include_directories(datachannel PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/deps/byte-lite/include)
 target_link_libraries(datachannel PRIVATE Threads::Threads)
 target_link_libraries(datachannel PRIVATE Usrsctp::Usrsctp plog::plog)
 

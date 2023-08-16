@@ -13,7 +13,7 @@
 #include <memory>
 #include <mutex>
 
-#if defined(HAVE_CXX17_OPTIONAL)
+#if defined(HAVE_CXX17)
 #include <optional>
 #else
 #include "tl/optional.hpp"
@@ -24,7 +24,7 @@
 
 namespace rtc {
 
-#if defined(HAVE_CXX17_OPTIONAL)
+#if defined(HAVE_CXX17)
 using std::optional;
 #else
 using tl::optional;
@@ -68,7 +68,7 @@ struct gens<0, S...> {
   typedef seq<S...> type;
 };
 
-#if defined(HAVE_CXX17_WEAK_FROM_THIS)
+#if defined(HAVE_CXX17)
 template <class C> std::weak_ptr<C> weak_from_this(C *c) { return c->weak_from_this(); }
 #else
 template <class C> std::weak_ptr<C> weak_from_this(C *c) {
