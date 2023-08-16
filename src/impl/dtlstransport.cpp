@@ -544,7 +544,7 @@ void DtlsTransport::doRecv() {
 
 				if (ret == MBEDTLS_ERR_SSL_WANT_READ) {
 					ThreadPool::Instance().schedule(mTimerSetAt + milliseconds(mFinMs),
-					                                [weak_this = weak_ptr<DtlsTransport>(shared_from_this())]() {
+					                                [weak_this = rtc::weak_from_this(this)]() {
 						                                if (auto locked = weak_this.lock())
 							                                locked->doRecv();
 					                                });
