@@ -14,6 +14,8 @@
 
 namespace rtc {
 
+const uint32_t OpusRtpPacketizer::defaultClockRate = 48 * 1000;
+
 OpusRtpPacketizer::OpusRtpPacketizer(shared_ptr<RtpPacketizationConfig> rtpConfig)
     : RtpPacketizer(rtpConfig), MediaHandlerRootElement() {}
 

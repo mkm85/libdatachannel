@@ -71,7 +71,7 @@ void test_negotiated() {
 	if (!negotiated1->isOpen() || !negotiated2->isOpen())
 		throw runtime_error("Negotiated DataChannel is not open");
 
-	std::atomic<bool> received = false;
+	std::atomic<bool> received = { false };
 	negotiated2->onMessage([&received](const variant<binary, string> &message) {
 		if (holds_alternative<string>(message)) {
 			cout << "Message 2: " << get<string>(message) << endl;
@@ -79,7 +79,7 @@ void test_negotiated() {
 		}
 	});
 
-	negotiated1->send("Hello from negotiated channel");
+	negotiated1->send(std::string("Hello from negotiated channel"));
 
 	// Wait a bit
 	attempts = 5;

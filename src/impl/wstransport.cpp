@@ -40,7 +40,6 @@
 namespace rtc {
 namespace impl {
 
-using std::to_integer;
 using std::to_string;
 using std::chrono::system_clock;
 
@@ -53,8 +52,9 @@ WsTransport::WsTransport(
                 std::move(stateCallback)),
       mHandshake(std::move(handshake)),
       mIsClient(
-          visit(make_overloaded([](auto l) { return l->isActive(); },
-                                     [](shared_ptr<TlsTransport> l) { return l->isClient(); }),
+          visit(make_overloaded([](shared_ptr<TcpTransport> l) { return l->isActive(); },
+		  						[](shared_ptr<HttpProxyTransport> l) { return l->isActive(); },
+                                [](shared_ptr<TlsTransport> l) { return l->isClient(); }),
                      lower)),
       mMaxOutstandingPings(maxOutstandingPings) {
 
@@ -102,7 +102,7 @@ void WsTransport::close() {
 	}
 
 	ThreadPool::Instance().schedule(std::chrono::seconds(10),
-	                                [this, weak_this = weak_from_this()]() {
+	                                [this, weak_this = rtc::weak_from_this(this)]() {
 		                                if (auto shared_this = weak_this.lock()) {
 			                                PLOG_DEBUG << "WebSocket close timeout";
 			                                changeState(State::Disconnected);
@@ -340,7 +340,7 @@ void WsTransport::recvFrame(const Frame &frame) {
 }
 
 bool WsTransport::sendFrame(const Frame &frame) {
-	std::lock_guard lock(mSendMutex);
+	std::lock_guard<std::mutex> lock(mSendMutex);
 
 	PLOG_DEBUG << "WebSocket sending frame: opcode=" << int(frame.opcode)
 	           << ", length=" << frame.length;
@@ -348,16 +348,16 @@ bool WsTransport::sendFrame(const Frame &frame) {
 	byte buffer[14];
 	byte *cur = buffer;
 
-	*cur++ = byte((frame.opcode & 0x0F) | (frame.fin ? 0x80 : 0));
+	*cur++ = to_byte((frame.opcode & 0x0F) | (frame.fin ? 0x80 : 0));
 
 	if (frame.length < 0x7E) {
-		*cur++ = byte((frame.length & 0x7F) | (frame.mask ? 0x80 : 0));
+		*cur++ = to_byte((frame.length & 0x7F) | (frame.mask ? 0x80 : 0));
 	} else if (frame.length <= 0xFFFF) {
-		*cur++ = byte(0x7E | (frame.mask ? 0x80 : 0));
+		*cur++ = to_byte(0x7E | (frame.mask ? 0x80 : 0));
 		*reinterpret_cast<uint16_t *>(cur) = htons(uint16_t(frame.length));
 		cur += 2;
 	} else {
-		*cur++ = byte(0x7F | (frame.mask ? 0x80 : 0));
+		*cur++ = to_byte(0x7F | (frame.mask ? 0x80 : 0));
 		*reinterpret_cast<uint64_t *>(cur) = htonll(uint64_t(frame.length));
 		cur += 8;
 	}

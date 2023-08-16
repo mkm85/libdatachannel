@@ -31,7 +31,7 @@ TcpServer::~TcpServer() { close(); }
 
 shared_ptr<TcpTransport> TcpServer::accept() {
 	while (true) {
-		std::unique_lock lock(mSockMutex);
+		std::unique_lock<std::mutex> lock(mSockMutex);
 
 		if (mSock == INVALID_SOCKET)
 			break;
@@ -81,7 +81,7 @@ shared_ptr<TcpTransport> TcpServer::accept() {
 }
 
 void TcpServer::close() {
-	std::unique_lock lock(mSockMutex);
+	std::unique_lock<std::mutex> lock(mSockMutex);
 	if (mSock != INVALID_SOCKET) {
 		PLOG_DEBUG << "Closing TCP server socket";
 		::closesocket(mSock);
@@ -116,7 +116,7 @@ void TcpServer::listen(uint16_t port, const char* bindAddress) {
 		    (ai = find_family(result, AF_INET)) == NULL)
 			throw std::runtime_error("No suitable address family found");
 
-		std::unique_lock lock(mSockMutex);
+		std::unique_lock<std::mutex> lock(mSockMutex);
 		PLOG_VERBOSE << "Creating TCP server socket";
 
 		// Create socket

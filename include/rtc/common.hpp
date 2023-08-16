@@ -75,6 +75,11 @@
 #include "nonstd/byte.hpp"
 #endif
 
+#if defined(HAVE_CXX17_SHARED_MUTEX)
+#include <shared_mutex>
+#else
+#include "sm/shared_mutex.hpp"
+#endif
 
 #include <vector>
 
@@ -108,9 +113,13 @@ using nonstd::string_view;
 using std::unique_ptr;
 
 #if defined(HAVE_CXX17_VARIANT)
+using std::get;
+using std::holds_alternative;
 using std::variant;
 using std::visit;
 #else
+using nonstd::get;
+using nonstd::holds_alternative;
 using nonstd::variant;
 using nonstd::visit;
 #endif
@@ -118,11 +127,19 @@ using nonstd::visit;
 #if defined(HAVE_CXX17_BYTE)
 //namespace lib {
 using std::to_integer;
+template <class I> inline byte to_byte(I i) { return i; }
 //}
 #else
 //namespace lib {
 using nonstd::to_integer;
+using nonstd::to_byte;
 //}
+#endif
+
+#if defined(HAVE_CXX17_SHARED_MUTEX)
+using std::shared_mutex;
+#else
+using sm::shared_mutex;
 #endif
 
 using std::weak_ptr;

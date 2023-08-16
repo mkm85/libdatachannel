@@ -225,7 +225,7 @@ optional<string> IceTransport::getLocalAddress() const {
 	char str[JUICE_MAX_ADDRESS_STRING_LEN];
 	if (juice_get_selected_addresses(mAgent.get(), str, JUICE_MAX_ADDRESS_STRING_LEN, NULL, 0) ==
 	    0) {
-		return std::make_optional(string(str));
+		return make_optional(string(str));
 	}
 	return nullopt;
 }
@@ -233,7 +233,7 @@ optional<string> IceTransport::getRemoteAddress() const {
 	char str[JUICE_MAX_ADDRESS_STRING_LEN];
 	if (juice_get_selected_addresses(mAgent.get(), NULL, 0, str, JUICE_MAX_ADDRESS_STRING_LEN) ==
 	    0) {
-		return std::make_optional(string(str));
+		return make_optional(string(str));
 	}
 	return nullopt;
 }
@@ -701,7 +701,7 @@ optional<string> IceTransport::getLocalAddress() const {
 	NiceCandidate *local = nullptr;
 	NiceCandidate *remote = nullptr;
 	if (nice_agent_get_selected_pair(mNiceAgent.get(), mStreamId, 1, &local, &remote)) {
-		return std::make_optional(AddressToString(local->addr));
+		return make_optional(AddressToString(local->addr));
 	}
 	return nullopt;
 }
@@ -710,7 +710,7 @@ optional<string> IceTransport::getRemoteAddress() const {
 	NiceCandidate *local = nullptr;
 	NiceCandidate *remote = nullptr;
 	if (nice_agent_get_selected_pair(mNiceAgent.get(), mStreamId, 1, &local, &remote)) {
-		return std::make_optional(AddressToString(remote->addr));
+		return make_optional(AddressToString(remote->addr));
 	}
 	return nullopt;
 }
@@ -725,7 +725,7 @@ bool IceTransport::send(message_ptr message) {
 }
 
 bool IceTransport::outgoing(message_ptr message) {
-	std::lock_guard lock(mOutgoingMutex);
+	std::lock_guard<std::mutex> lock(mOutgoingMutex);
 	if (mOutgoingDscp != message->dscp) {
 		mOutgoingDscp = message->dscp;
 		// Explicit Congestion Notification takes the least-significant 2 bits of the DS field

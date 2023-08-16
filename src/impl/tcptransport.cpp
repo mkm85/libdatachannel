@@ -81,7 +81,7 @@ void TcpTransport::start() {
 }
 
 bool TcpTransport::send(message_ptr message) {
-	std::lock_guard lock(mSendMutex);
+	std::lock_guard<std::mutex> lock(mSendMutex);
 
 	if (state() != State::Connected)
 		throw std::runtime_error("Connection is not open");
@@ -131,7 +131,7 @@ void TcpTransport::connect() {
 }
 
 void TcpTransport::resolve() {
-	std::lock_guard lock(mSendMutex);
+	std::lock_guard<std::mutex> lock(mSendMutex);
 	mResolved.clear();
 
 	if (state() != State::Connecting)
@@ -177,7 +177,7 @@ void TcpTransport::resolve() {
 }
 
 void TcpTransport::attempt() {
-	std::lock_guard lock(mSendMutex);
+	std::lock_guard<std::mutex> lock(mSendMutex);
 
 	if (state() != State::Connecting)
 		return; // Cancelled
@@ -194,7 +194,9 @@ void TcpTransport::attempt() {
 	}
 
 	try {
-		auto [addr, addrlen] = mResolved.front();
+		sockaddr_storage addr;
+		socklen_t addrlen;
+		std::tie(addr, addrlen) = mResolved.front();
 		mResolved.pop_front();
 
 		createSocket(reinterpret_cast<const struct sockaddr *>(&addr), addrlen);
@@ -307,7 +309,7 @@ void TcpTransport::setPoll(PollService::Direction direction) {
 }
 
 void TcpTransport::close() {
-	std::lock_guard lock(mSendMutex);
+	std::lock_guard<std::mutex> lock(mSendMutex);
 	if (mSock != INVALID_SOCKET) {
 		PLOG_DEBUG << "Closing TCP socket";
 		PollService::Instance().remove(mSock);
@@ -385,7 +387,7 @@ void TcpTransport::triggerBufferedAmount(size_t amount) {
 }
 
 void TcpTransport::process(PollService::Event event) {
-	auto self = weak_from_this().lock();
+	auto self = rtc::weak_from_this(this).lock();
 	if (!self)
 		return;
 

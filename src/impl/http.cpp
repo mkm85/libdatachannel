@@ -16,7 +16,7 @@ namespace impl {
 bool isHttpRequest(const byte *buffer, size_t size) {
 	// Check the buffer starts with a valid-looking HTTP method
 	for (size_t i = 0; i < size; ++i) {
-		char c = static_cast<char>(buffer[i]);
+		char c = static_cast<char>(to_integer<uint8_t>(buffer[i]));
 		if (i > 0 && c == ' ')
 			break;
 		else if (i >= 8 || c < 'A' || c > 'Z')
@@ -47,10 +47,12 @@ size_t parseHttpLines(const byte *buffer, size_t size, std::list<string> &lines)
 std::multimap<string, string> parseHttpHeaders(const std::list<string> &lines) {
 	std::multimap<string, string> headers;
 	for (const auto &line : lines) {
-		if (size_t pos = line.find_first_of(':'); pos != string::npos) {
+		size_t pos = line.find_first_of(':');
+		if (pos != string::npos) {
 			string key = line.substr(0, pos);
 			string value = "";
-			if (size_t subPos = line.find_first_not_of(' ', pos + 1); subPos != string::npos) {
+			size_t subPos = line.find_first_not_of(' ', pos + 1);
+			if (subPos != string::npos) {
 				value = line.substr(subPos);
 			}
 			std::transform(key.begin(), key.end(), key.begin(),

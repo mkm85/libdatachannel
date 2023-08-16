@@ -72,9 +72,9 @@ size_t benchmark(milliseconds duration) {
 
 	const size_t messageSize = 65535;
 	binary messageData(messageSize);
-	fill(messageData.begin(), messageData.end(), byte(0xFF));
+	fill(messageData.begin(), messageData.end(), to_byte(0xFF));
 
-	atomic<size_t> receivedSize = 0;
+	atomic<size_t> receivedSize = { 0 };
 
 	steady_clock::time_point startTime, openTime, receivedTime, endTime;
 

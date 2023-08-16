@@ -65,7 +65,7 @@ struct WebSocket final : public Channel, public std::enable_shared_from_this<Web
 
 	const Configuration config;
 
-	std::atomic<State> state = State::Closed;
+	std::atomic<State> state = { State::Closed };
 
 private:
 	void scheduleConnectionTimeout();

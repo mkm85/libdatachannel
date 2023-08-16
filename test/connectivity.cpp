@@ -103,7 +103,7 @@ void test_connectivity(bool signal_wrong_fingerprint) {
 		dc->onOpen([wdc = make_weak_ptr(dc)]() {
 			if (auto dc = wdc.lock()) {
 				cout << "DataChannel 2: Open" << endl;
-				dc->send("Hello from 2");
+				dc->send(std::string("Hello from 2"));
 			}
 		});
 
@@ -126,7 +126,7 @@ void test_connectivity(bool signal_wrong_fingerprint) {
 	dc1->onOpen([wdc1 = make_weak_ptr(dc1)]() {
 		if (auto dc1 = wdc1.lock()) {
 			cout << "DataChannel 1: Open" << endl;
-			dc1->send("Hello from 1");
+			dc1->send(std::string("Hello from 1"));
 		}
 	});
 
@@ -190,7 +190,7 @@ void test_connectivity(bool signal_wrong_fingerprint) {
 
 		dc->onOpen([wdc = make_weak_ptr(dc)]() {
 			if (auto dc = wdc.lock())
-				dc->send("Second hello from 2");
+				dc->send(std::string("Second hello from 2"));
 		});
 
 		dc->onMessage([](variant<binary, string> message) {
@@ -210,7 +210,7 @@ void test_connectivity(bool signal_wrong_fingerprint) {
 	second1->onOpen([wsecond1 = make_weak_ptr(second1)]() {
 		if (auto second1 = wsecond1.lock()) {
 			cout << "Second DataChannel 1: Open" << endl;
-			second1->send("Second hello from 1");
+			second1->send(std::string("Second hello from 1"));
 		}
 	});
 

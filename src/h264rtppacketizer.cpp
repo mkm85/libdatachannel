@@ -34,7 +34,7 @@ typedef enum {
 NalUnitStartSequenceMatch StartSequenceMatchSucc(NalUnitStartSequenceMatch match, byte _byte,
                                                  H264RtpPacketizer::Separator separator) {
 	assert(separator != H264RtpPacketizer::Separator::Length);
-	auto byte = (uint8_t)_byte;
+	uint8_t byte = rtc::to_integer<uint8_t>(_byte);
 	auto detectShort = separator == H264RtpPacketizer::Separator::ShortStartSequence ||
 	                   separator == H264RtpPacketizer::Separator::StartSequence;
 	auto detectLong = separator == H264RtpPacketizer::Separator::LongStartSequence ||
@@ -73,6 +73,8 @@ NalUnitStartSequenceMatch StartSequenceMatchSucc(NalUnitStartSequenceMatch match
 	}
 	return NUSM_noMatch;
 }
+
+const uint32_t H264RtpPacketizer::defaultClockRate = 90 * 1000;
 
 shared_ptr<NalUnits> H264RtpPacketizer::splitMessage(binary_ptr message) {
 	auto nalus = std::make_shared<NalUnits>();

@@ -16,22 +16,22 @@ namespace rtc {
 
 const auto payloadHeaderSize = 1;
 
-const auto zMask = byte(0b10000000);
-const auto yMask = byte(0b01000000);
-const auto nMask = byte(0b00001000);
+const byte zMask = to_byte(0b10000000);
+const byte yMask = to_byte(0b01000000);
+const byte nMask = to_byte(0b00001000);
 
 const auto wBitshift = 4;
 
-const auto obuFrameTypeMask = byte(0b01111000);
+const byte obuFrameTypeMask = to_byte(0b01111000);
 const auto obuFrameTypeBitshift = 3;
 
 const auto obuHeaderSize = 1;
-const auto obuHasExtensionMask = byte(0b00000100);
-const auto obuHasSizeMask = byte(0b00000010);
+const byte obuHasExtensionMask = to_byte(0b00000100);
+const byte obuHasSizeMask = to_byte(0b00000010);
 
-const auto obuFrameTypeSequenceHeader = byte(1);
+const byte obuFrameTypeSequenceHeader = to_byte(1);
 
-const auto obuTemporalUnitDelimiter = std::vector<byte>{byte(0x12), byte(0x00)};
+const auto obuTemporalUnitDelimiter = std::vector<byte>{to_byte(0x12), to_byte(0x00)};
 
 const auto oneByteLeb128Size = 1;
 
@@ -48,11 +48,11 @@ std::vector<binary_ptr> extractTemporalUnitObus(binary_ptr message) {
 
 	size_t messageIndex = 2;
 	while (messageIndex < message->size()) {
-		if ((message->at(messageIndex) & obuHasSizeMask) == byte(0)) {
+		if ((message->at(messageIndex) & obuHasSizeMask) == to_byte(0)) {
 			return obus;
 		}
 
-		if ((message->at(messageIndex) & obuHasExtensionMask) != byte(0)) {
+		if ((message->at(messageIndex) & obuHasExtensionMask) != to_byte(0)) {
 			messageIndex++;
 		}
 
@@ -60,12 +60,12 @@ std::vector<binary_ptr> extractTemporalUnitObus(binary_ptr message) {
 		uint32_t obuLength = 0;
 		uint8_t leb128Size = 0;
 		while (leb128Size < 8) {
-			auto leb128Index = messageIndex + leb128Size + obuHeaderSize;
+			size_t leb128Index = messageIndex + leb128Size + obuHeaderSize;
 			if (message->size() < leb128Index) {
 				break;
 			}
 
-			auto leb128_byte = uint8_t(message->at(leb128Index));
+			auto leb128_byte = (to_integer<uint8_t>(message->at(leb128Index)));
 
 			obuLength |= ((leb128_byte & sevenLsbBitmask) << (leb128Size * 7));
 			leb128Size++;
@@ -147,12 +147,12 @@ std::vector<binary_ptr> AV1RtpPacketizer::packetizeObu(binary_ptr message,
 		    std::min(size_t(maximumFragmentSize), messageRemaining + metadataSize));
 		auto payloadOffset = payloadHeaderSize;
 
-		payload->at(0) = byte(obuCount) << wBitshift;
+		payload->at(0) = byte{obuCount} << wBitshift;
 
 		// Packetize cached SequenceHeader
 		if (obuCount == 2) {
 			payload->at(0) ^= nMask;
-			payload->at(1) = byte(sequenceHeader->size() & sevenLsbBitmask);
+			payload->at(1) = byte{sequenceHeader->size() & sevenLsbBitmask};
 			payloadOffset += oneByteLeb128Size;
 
 			std::memcpy(payload->data() + payloadOffset, sequenceHeader->data(),

@@ -68,9 +68,15 @@ struct gens<0, S...> {
   typedef seq<S...> type;
 };
 
+#if defined(HAVE_CXX17_WEAK_FROM_THIS)
+template <class C> std::weak_ptr<C> weak_from_this(C *c) { return c->weak_from_this(); }
+#else
+template <class C> std::weak_ptr<C> weak_from_this(C *c) { return c->shared_from_this(); }
+#endif
+
 // weak_ptr bind helper
 template <typename F, typename T, typename... Args> auto weak_bind(F &&f, T *t, Args &&..._args) {
-	return [bound = std::bind(f, t, _args...), weak_this = t->weak_from_this()](auto &&...args) {
+	return [bound = std::bind(f, t, _args...), weak_this = rtc::weak_from_this(t)](auto &&...args) {
 		if (auto shared_this = weak_this.lock())
 			return bound(args...);
 		else

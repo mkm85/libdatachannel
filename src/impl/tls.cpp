@@ -159,7 +159,7 @@ void init() {
 	static std::mutex mutex;
 	static bool done = false;
 
-	std::lock_guard lock(mutex);
+	std::lock_guard<std::mutex> lock(mutex);
 	if (!std::exchange(done, true)) {
 		OPENSSL_init_ssl(OPENSSL_INIT_LOAD_SSL_STRINGS | OPENSSL_INIT_LOAD_CRYPTO_STRINGS, nullptr);
 		OPENSSL_init_crypto(OPENSSL_INIT_LOAD_CRYPTO_STRINGS, nullptr);

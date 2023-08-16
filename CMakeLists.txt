@@ -84,6 +84,12 @@ else()
 	include_directories(${CMAKE_CURRENT_SOURCE_DIR}/deps/byte-lite/include)
 endif()
 
+if (HAVE_CXX17_SHARED_MUTEX)
+	add_definitions(-DHAVE_CXX17_SHARED_MUTEX)
+else()
+	include_directories(${CMAKE_CURRENT_SOURCE_DIR}/deps/shared_mutex/include)
+endif()
+
 
 if(WIN32)
 	add_definitions(-DWIN32_LEAN_AND_MEAN)

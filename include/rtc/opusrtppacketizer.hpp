@@ -21,7 +21,7 @@ class RTC_CPP_EXPORT OpusRtpPacketizer final : public RtpPacketizer,
                                                public MediaHandlerRootElement {
 public:
 	/// default clock rate used in opus RTP communication
-	inline static const uint32_t defaultClockRate = 48 * 1000;
+	static const uint32_t defaultClockRate;
 
 	/// Constructs opus packetizer with given RTP configuration.
 	/// @note RTP configuration is used in packetization process which may change some configuration

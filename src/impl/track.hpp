@@ -67,7 +67,7 @@ private:
 	Description::Media mMediaDescription;
 	shared_ptr<MediaHandler> mMediaHandler;
 
-	mutable std::shared_mutex mMutex;
+	mutable shared_mutex mMutex;
 
 	std::atomic<bool> mIsClosed = { false };
 

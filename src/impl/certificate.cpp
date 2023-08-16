@@ -310,7 +310,7 @@ Certificate Certificate::Generate(CertificateType type, const string &commonName
 
 std::tuple<shared_ptr<mbedtls_x509_crt>, shared_ptr<mbedtls_pk_context>>
 Certificate::credentials() const {
-	return {mCrt, mPk};
+	return make_tuple(mCrt, mPk);
 }
 
 #else // OPENSSL
@@ -493,7 +493,7 @@ string make_fingerprint(X509 *x509) {
 // Common for GnuTLS, Mbed TLS, and OpenSSL
 
 future_certificate_ptr make_certificate(CertificateType type) {
-	return ThreadPool::Instance().enqueue([type, token = Init::Instance().token()]() {
+	return ThreadPool::Instance().enqueue<certificate_ptr>([type, token = Init::Instance().token()]() {
 		return std::make_shared<Certificate>(Certificate::Generate(type, "libdatachannel"));
 	});
 }

@@ -78,7 +78,7 @@ private:
 	Opcode mPartialOpcode;
 	std::mutex mSendMutex;
 	int mOutstandingPings = 0;
-	std::atomic<bool> mCloseSent = false;
+	std::atomic<bool> mCloseSent = { false };
 };
 
 } } // namespace rtc::impl

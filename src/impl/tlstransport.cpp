@@ -27,7 +27,7 @@ void TlsTransport::enqueueRecv() {
 	if (mPendingRecvCount > 0)
 		return;
 
-	if (auto shared_this = weak_from_this().lock()) {
+	if (auto shared_this = rtc::weak_from_this(this).lock()) {
 		++mPendingRecvCount;
 		ThreadPool::Instance().enqueue(&TlsTransport::doRecv, std::move(shared_this));
 	}
@@ -41,7 +41,7 @@ gnutls_certificate_credentials_t default_certificate_credentials() {
 	static std::mutex mutex;
 	static shared_ptr<gnutls_certificate_credentials_t> creds;
 
-	std::lock_guard lock(mutex);
+	std::lock_guard<std::mutex> lock(mutex);
 	if (!creds) {
 		creds = shared_ptr<gnutls_certificate_credentials_t>(gnutls::new_credentials(),
 		                                                     gnutls::free_credentials);
@@ -162,7 +162,7 @@ void TlsTransport::postHandshake() {
 }
 
 void TlsTransport::doRecv() {
-	std::lock_guard lock(mRecvMutex);
+	std::lock_guard<std::mutex> lock(mRecvMutex);
 	--mPendingRecvCount;
 
 	const size_t bufferSize = 4096;
@@ -315,9 +315,9 @@ void TlsTransport::Cleanup() {
 TlsTransport::TlsTransport(variant<shared_ptr<TcpTransport>, shared_ptr<HttpProxyTransport>> lower,
                            optional<string> host, certificate_ptr certificate,
                            state_callback callback)
-    : Transport(std::visit([](auto l) { return std::static_pointer_cast<Transport>(l); }, lower),
+    : Transport(visit([](auto l) { return std::static_pointer_cast<Transport>(l); }, lower),
                 std::move(callback)),
-      mHost(std::move(host)), mIsClient(std::visit([](auto l) { return l->isActive(); }, lower)),
+      mHost(std::move(host)), mIsClient(visit([](auto l) { return l->isActive(); }, lower)),
       mIncomingQueue(RECV_QUEUE_LIMIT, message_size_func) {
 
 	PLOG_DEBUG << "Initializing TLS transport (MbedTLS)";
@@ -339,7 +339,9 @@ TlsTransport::TlsTransport(variant<shared_ptr<TcpTransport>, shared_ptr<HttpProx
 		mbedtls_ssl_conf_rng(&mConf, mbedtls_ctr_drbg_random, &mDrbg);
 
 		if (certificate) {
-			auto [crt, pk] = certificate->credentials();
+			shared_ptr<mbedtls_x509_crt> crt;
+			shared_ptr<mbedtls_pk_context> pk;
+			std::tie(crt, pk) = certificate->credentials();
 			mbedtls::check(mbedtls_ssl_conf_own_cert(&mConf, crt.get(), pk.get()));
 		}
 
@@ -382,7 +384,7 @@ bool TlsTransport::send(message_ptr message) {
 
 	int ret;
 	do {
-		std::lock_guard lock(mSslMutex);
+		std::lock_guard<std::mutex> lock(mSslMutex);
 		ret = mbedtls_ssl_write(&mSsl, reinterpret_cast<const unsigned char *>(message->data()),
 		                        int(message->size()));
 	} while (ret == MBEDTLS_ERR_SSL_WANT_WRITE);
@@ -416,7 +418,7 @@ void TlsTransport::postHandshake() {
 }
 
 void TlsTransport::doRecv() {
-	std::lock_guard lock(mRecvMutex);
+	std::lock_guard<std::mutex> lock(mRecvMutex);
 	--mPendingRecvCount;
 
 	if (state() != State::Connecting && state() != State::Connected)
@@ -431,7 +433,7 @@ void TlsTransport::doRecv() {
 			while (true) {
 				int ret;
 				{
-					std::lock_guard lock(mSslMutex);
+					std::lock_guard<std::mutex> lock(mSslMutex);
 					ret = mbedtls_ssl_handshake(&mSsl);
 				}
 
@@ -452,7 +454,7 @@ void TlsTransport::doRecv() {
 			while (true) {
 				int ret;
 				{
-					std::lock_guard lock(mSslMutex);
+					std::lock_guard<std::mutex> lock(mSslMutex);
 					ret = mbedtls_ssl_read(&mSsl, reinterpret_cast<unsigned char *>(buffer),
 					                       bufferSize);
 				}
@@ -643,7 +645,7 @@ void TlsTransport::start() {
 	// Initiate the handshake
 	int ret, err;
 	{
-		std::lock_guard lock(mSslMutex);
+		std::lock_guard<std::mutex> lock(mSslMutex);
 		ret = SSL_do_handshake(mSsl);
 		err = SSL_get_error(mSsl, ret);
 		flushOutput();
@@ -671,7 +673,7 @@ bool TlsTransport::send(message_ptr message) {
 	int err;
 	bool result;
 	{
-		std::lock_guard lock(mSslMutex);
+		std::lock_guard<std::mutex> lock(mSslMutex);
 		int ret = SSL_write(mSsl, message->data(), int(message->size()));
 		err = SSL_get_error(mSsl, ret);
 		result = flushOutput();
@@ -702,7 +704,7 @@ void TlsTransport::postHandshake() {
 }
 
 void TlsTransport::doRecv() {
-	std::lock_guard lock(mRecvMutex);
+	std::lock_guard<std::mutex> lock(mRecvMutex);
 	--mPendingRecvCount;
 
 	if (state() != State::Connecting && state() != State::Connected)
@@ -728,7 +730,7 @@ void TlsTransport::doRecv() {
 				// Continue the handshake
 				int ret, err;
 				{
-					std::lock_guard lock(mSslMutex);
+					std::lock_guard<std::mutex> lock(mSslMutex);
 					ret = SSL_do_handshake(mSsl);
 					err = SSL_get_error(mSsl, ret);
 					flushOutput();
@@ -745,7 +747,7 @@ void TlsTransport::doRecv() {
 				int ret, err;
 				while (true) {
 					{
-						std::lock_guard lock(mSslMutex);
+						std::lock_guard<std::mutex> lock(mSslMutex);
 						ret = SSL_read(mSsl, buffer, bufferSize);
 						err = SSL_get_error(mSsl, ret);
 						flushOutput(); // SSL_read() can also cause write operations
@@ -767,7 +769,7 @@ void TlsTransport::doRecv() {
 			}
 		}
 
-		std::lock_guard lock(mSslMutex);
+		std::lock_guard<std::mutex> lock(mSslMutex);
 		SSL_shutdown(mSsl);
 
 	} catch (const std::exception &e) {

@@ -63,7 +63,7 @@ protected:
 	string mProtocol;
 	shared_ptr<Reliability> mReliability;
 
-	mutable std::shared_mutex mMutex;
+	mutable shared_mutex mMutex;
 
 	std::atomic<bool> mIsOpen = { false };
 	std::atomic<bool> mIsClosed = { false };

@@ -75,7 +75,7 @@ void InitLogger(LogLevel level, LogCallback callback) {
 	const auto severity = static_cast<plog::Severity>(level);
 	static LogAppender *appender = nullptr;
 	static std::mutex mutex;
-	std::lock_guard lock(mutex);
+	std::lock_guard<std::mutex> lock(mutex);
 	if (appender) {
 		appender->callback = std::move(callback);
 		plogInit(severity, nullptr); // change the severity

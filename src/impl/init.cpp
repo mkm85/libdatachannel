@@ -74,7 +74,7 @@ Init::Init() {
 Init::~Init() {}
 
 init_token Init::token() {
-	std::lock_guard lock(mMutex);
+	std::lock_guard<std::mutex> lock(mMutex);
 	if (auto locked = mWeak.lock())
 		return locked;
 
@@ -84,7 +84,7 @@ init_token Init::token() {
 }
 
 void Init::preload() {
-	std::lock_guard lock(mMutex);
+	std::lock_guard<std::mutex> lock(mMutex);
 	if (!mGlobal) {
 		mGlobal = std::make_shared<TokenPayload>(&mCleanupFuture);
 		mWeak = *mGlobal;
@@ -92,13 +92,13 @@ void Init::preload() {
 }
 
 std::shared_future<void> Init::cleanup() {
-	std::lock_guard lock(mMutex);
+	std::lock_guard<std::mutex> lock(mMutex);
 	mGlobal.reset();
 	return mCleanupFuture;
 }
 
 void Init::setSctpSettings(SctpSettings s) {
-	std::lock_guard lock(mMutex);
+	std::lock_guard<std::mutex> lock(mMutex);
 	if (mGlobal)
 		SctpTransport::SetSettings(s);
 
@@ -149,7 +149,7 @@ void Init::doInit() {
 }
 
 void Init::doCleanup() {
-	std::lock_guard lock(mMutex);
+	std::lock_guard<std::mutex> lock(mMutex);
 	if (mGlobal)
 		return;
 

@@ -69,7 +69,7 @@ void test_websocketserver() {
 
 	ws.onClosed([]() { cout << "WebSocket: Closed" << endl; });
 
-	std::atomic<bool> received = false;
+	std::atomic<bool> received = { false };
 	ws.onMessage([&received, &myMessage](variant<binary, string> message) {
 		if (holds_alternative<string>(message)) {
 			string str = std::move(get<string>(message));

@@ -88,7 +88,7 @@ void test_turn_connectivity() {
 		dc->onOpen([wdc = make_weak_ptr(dc)]() {
 			if (auto dc = wdc.lock()) {
 				cout << "DataChannel 2: Open" << endl;
-				dc->send("Hello from 2");
+				dc->send(std::string("Hello from 2"));
 			}
 		});
 
@@ -108,7 +108,7 @@ void test_turn_connectivity() {
 			return;
 
 		cout << "DataChannel 1: Open" << endl;
-		dc1->send("Hello from 1");
+		dc1->send(std::string("Hello from 1"));
 	});
 
 	dc1->onClosed([]() { cout << "DataChannel 1: Closed" << endl; });
@@ -162,7 +162,7 @@ void test_turn_connectivity() {
 
 		dc->onOpen([wdc = make_weak_ptr(dc)]() {
 			if (auto dc = wdc.lock())
-				dc->send("Second hello from 2");
+				dc->send(std::string("Second hello from 2"));
 		});
 
 		dc->onMessage([](variant<binary, string> message) {
@@ -182,7 +182,7 @@ void test_turn_connectivity() {
 			return;
 
 		cout << "Second DataChannel 1: Open" << endl;
-		second1->send("Second hello from 1");
+		second1->send(std::string("Second hello from 1"));
 	});
 
 	second1->onClosed([]() { cout << "Second DataChannel 1: Closed" << endl; });
@@ -214,7 +214,7 @@ void test_turn_connectivity() {
 	if (!negotiated1->isOpen() || !negotiated2->isOpen())
 		throw runtime_error("Negotiated DataChannel is not open");
 
-	std::atomic<bool> received = false;
+	std::atomic<bool> received = { false };
 	negotiated2->onMessage([&received](const variant<binary, string> &message) {
 		if (holds_alternative<string>(message)) {
 			cout << "Second Message 2: " << get<string>(message) << endl;
@@ -222,7 +222,7 @@ void test_turn_connectivity() {
 		}
 	});
 
-	negotiated1->send("Hello from negotiated channel");
+	negotiated1->send(std::string("Hello from negotiated channel"));
 
 	// Wait a bit
 	attempts = 5;

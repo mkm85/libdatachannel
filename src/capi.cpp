@@ -42,42 +42,45 @@ std::mutex mutex;
 int lastId = 0;
 
 optional<void *> getUserPointer(int id) {
-	std::lock_guard lock(mutex);
+	std::lock_guard<std::mutex> lock(mutex);
 	auto it = userPointerMap.find(id);
-	return it != userPointerMap.end() ? std::make_optional(it->second) : nullopt;
+	return it != userPointerMap.end() ? make_optional(it->second) : nullopt;
 }
 
 void setUserPointer(int i, void *ptr) {
-	std::lock_guard lock(mutex);
+	std::lock_guard<std::mutex> lock(mutex);
 	userPointerMap[i] = ptr;
 }
 
 shared_ptr<PeerConnection> getPeerConnection(int id) {
-	std::lock_guard lock(mutex);
-	if (auto it = peerConnectionMap.find(id); it != peerConnectionMap.end())
+	std::lock_guard<std::mutex> lock(mutex);
+	auto it = peerConnectionMap.find(id);
+	if (it != peerConnectionMap.end())
 		return it->second;
 	else
 		throw std::invalid_argument("PeerConnection ID does not exist");
 }
 
 shared_ptr<DataChannel> getDataChannel(int id) {
-	std::lock_guard lock(mutex);
-	if (auto it = dataChannelMap.find(id); it != dataChannelMap.end())
+	std::lock_guard<std::mutex> lock(mutex);
+	auto it = dataChannelMap.find(id);
+	if (it != dataChannelMap.end())
 		return it->second;
 	else
 		throw std::invalid_argument("DataChannel ID does not exist");
 }
 
 shared_ptr<Track> getTrack(int id) {
-	std::lock_guard lock(mutex);
-	if (auto it = trackMap.find(id); it != trackMap.end())
+	std::lock_guard<std::mutex> lock(mutex);
+	auto it = trackMap.find(id);
+	if (it != trackMap.end())
 		return it->second;
 	else
 		throw std::invalid_argument("Track ID does not exist");
 }
 
 int emplacePeerConnection(shared_ptr<PeerConnection> ptr) {
-	std::lock_guard lock(mutex);
+	std::lock_guard<std::mutex> lock(mutex);
 	int pc = ++lastId;
 	peerConnectionMap.emplace(std::make_pair(pc, ptr));
 	userPointerMap.emplace(std::make_pair(pc, nullptr));
@@ -85,7 +88,7 @@ int emplacePeerConnection(shared_ptr<PeerConnection> ptr) {
 }
 
 int emplaceDataChannel(shared_ptr<DataChannel> ptr) {
-	std::lock_guard lock(mutex);
+	std::lock_guard<std::mutex> lock(mutex);
 	int dc = ++lastId;
 	dataChannelMap.emplace(std::make_pair(dc, ptr));
 	userPointerMap.emplace(std::make_pair(dc, nullptr));
@@ -93,7 +96,7 @@ int emplaceDataChannel(shared_ptr<DataChannel> ptr) {
 }
 
 int emplaceTrack(shared_ptr<Track> ptr) {
-	std::lock_guard lock(mutex);
+	std::lock_guard<std::mutex> lock(mutex);
 	int tr = ++lastId;
 	trackMap.emplace(std::make_pair(tr, ptr));
 	userPointerMap.emplace(std::make_pair(tr, nullptr));
@@ -101,21 +104,21 @@ int emplaceTrack(shared_ptr<Track> ptr) {
 }
 
 void erasePeerConnection(int pc) {
-	std::lock_guard lock(mutex);
+	std::lock_guard<std::mutex> lock(mutex);
 	if (peerConnectionMap.erase(pc) == 0)
 		throw std::invalid_argument("Peer Connection ID does not exist");
 	userPointerMap.erase(pc);
 }
 
 void eraseDataChannel(int dc) {
-	std::lock_guard lock(mutex);
+	std::lock_guard<std::mutex> lock(mutex);
 	if (dataChannelMap.erase(dc) == 0)
 		throw std::invalid_argument("Data Channel ID does not exist");
 	userPointerMap.erase(dc);
 }
 
 void eraseTrack(int tr) {
-	std::lock_guard lock(mutex);
+	std::lock_guard<std::mutex> lock(mutex);
 	if (trackMap.erase(tr) == 0)
 		throw std::invalid_argument("Track ID does not exist");
 #if RTC_ENABLE_MEDIA
@@ -127,7 +130,7 @@ void eraseTrack(int tr) {
 }
 
 size_t eraseAll() {
-	std::lock_guard lock(mutex);
+	std::lock_guard<std::mutex> lock(mutex);
 	size_t count = dataChannelMap.size() + trackMap.size() + peerConnectionMap.size();
 	dataChannelMap.clear();
 	trackMap.clear();
@@ -148,20 +151,29 @@ size_t eraseAll() {
 }
 
 shared_ptr<Channel> getChannel(int id) {
-	std::lock_guard lock(mutex);
-	if (auto it = dataChannelMap.find(id); it != dataChannelMap.end())
-		return it->second;
-	if (auto it = trackMap.find(id); it != trackMap.end())
-		return it->second;
+	std::lock_guard<std::mutex> lock(mutex);
+	{
+		auto it = dataChannelMap.find(id);
+		if (it != dataChannelMap.end())
+			return it->second;
+	}
+	{
+		auto it = trackMap.find(id);
+		if (it != trackMap.end())
+			return it->second;
+	}
 #if RTC_ENABLE_WEBSOCKET
-	if (auto it = webSocketMap.find(id); it != webSocketMap.end())
-		return it->second;
+	{
+		auto it = webSocketMap.find(id);
+		if (it != webSocketMap.end())
+			return it->second;
+	}
 #endif
 	throw std::invalid_argument("DataChannel, Track, or WebSocket ID does not exist");
 }
 
 void eraseChannel(int id) {
-	std::lock_guard lock(mutex);
+	std::lock_guard<std::mutex> lock(mutex);
 	if (dataChannelMap.erase(id) != 0) {
 		userPointerMap.erase(id);
 		return;
@@ -240,8 +252,9 @@ string lowercased(string str) {
 }
 
 shared_ptr<RtcpSrReporter> getRtcpSrReporter(int id) {
-	std::lock_guard lock(mutex);
-	if (auto it = rtcpSrReporterMap.find(id); it != rtcpSrReporterMap.end()) {
+	std::lock_guard<std::mutex> lock(mutex);
+	auto it = rtcpSrReporterMap.find(id);
+	if (it != rtcpSrReporterMap.end()) {
 		return it->second;
 	} else {
 		throw std::invalid_argument("RTCP SR reporter ID does not exist");
@@ -249,13 +262,14 @@ shared_ptr<RtcpSrReporter> getRtcpSrReporter(int id) {
 }
 
 void emplaceRtcpSrReporter(shared_ptr<RtcpSrReporter> ptr, int tr) {
-	std::lock_guard lock(mutex);
+	std::lock_guard<std::mutex> lock(mutex);
 	rtcpSrReporterMap.emplace(std::make_pair(tr, ptr));
 }
 
 shared_ptr<MediaChainableHandler> getMediaChainableHandler(int id) {
-	std::lock_guard lock(mutex);
-	if (auto it = rtcpChainableHandlerMap.find(id); it != rtcpChainableHandlerMap.end()) {
+	std::lock_guard<std::mutex> lock(mutex);
+	auto it = rtcpChainableHandlerMap.find(id);
+	if (it != rtcpChainableHandlerMap.end()) {
 		return it->second;
 	} else {
 		throw std::invalid_argument("RTCP chainable handler ID does not exist");
@@ -263,13 +277,14 @@ shared_ptr<MediaChainableHandler> getMediaChainableHandler(int id) {
 }
 
 void emplaceMediaChainableHandler(shared_ptr<MediaChainableHandler> ptr, int tr) {
-	std::lock_guard lock(mutex);
+	std::lock_guard<std::mutex> lock(mutex);
 	rtcpChainableHandlerMap.emplace(std::make_pair(tr, ptr));
 }
 
 shared_ptr<RtpPacketizationConfig> getRtpConfig(int id) {
-	std::lock_guard lock(mutex);
-	if (auto it = rtpConfigMap.find(id); it != rtpConfigMap.end()) {
+	std::lock_guard<std::mutex> lock(mutex);
+	auto it = rtpConfigMap.find(id);
+	if (it != rtpConfigMap.end()) {
 		return it->second;
 	} else {
 		throw std::invalid_argument("RTP configuration ID does not exist");
@@ -277,7 +292,7 @@ shared_ptr<RtpPacketizationConfig> getRtpConfig(int id) {
 }
 
 void emplaceRtpConfig(shared_ptr<RtpPacketizationConfig> ptr, int tr) {
-	std::lock_guard lock(mutex);
+	std::lock_guard<std::mutex> lock(mutex);
 	rtpConfigMap.emplace(std::make_pair(tr, ptr));
 }
 
@@ -338,15 +353,16 @@ private:
 #if RTC_ENABLE_WEBSOCKET
 
 shared_ptr<WebSocket> getWebSocket(int id) {
-	std::lock_guard lock(mutex);
-	if (auto it = webSocketMap.find(id); it != webSocketMap.end())
+	std::lock_guard<std::mutex> lock(mutex);
+	auto it = webSocketMap.find(id);
+	if (it != webSocketMap.end())
 		return it->second;
 	else
 		throw std::invalid_argument("WebSocket ID does not exist");
 }
 
 int emplaceWebSocket(shared_ptr<WebSocket> ptr) {
-	std::lock_guard lock(mutex);
+	std::lock_guard<std::mutex> lock(mutex);
 	int ws = ++lastId;
 	webSocketMap.emplace(std::make_pair(ws, ptr));
 	userPointerMap.emplace(std::make_pair(ws, nullptr));
@@ -354,22 +370,23 @@ int emplaceWebSocket(shared_ptr<WebSocket> ptr) {
 }
 
 void eraseWebSocket(int ws) {
-	std::lock_guard lock(mutex);
+	std::lock_guard<std::mutex> lock(mutex);
 	if (webSocketMap.erase(ws) == 0)
 		throw std::invalid_argument("WebSocket ID does not exist");
 	userPointerMap.erase(ws);
 }
 
 shared_ptr<WebSocketServer> getWebSocketServer(int id) {
-	std::lock_guard lock(mutex);
-	if (auto it = webSocketServerMap.find(id); it != webSocketServerMap.end())
+	std::lock_guard<std::mutex> lock(mutex);
+	auto it = webSocketServerMap.find(id);
+	if (it != webSocketServerMap.end())
 		return it->second;
 	else
 		throw std::invalid_argument("WebSocketServer ID does not exist");
 }
 
 int emplaceWebSocketServer(shared_ptr<WebSocketServer> ptr) {
-	std::lock_guard lock(mutex);
+	std::lock_guard<std::mutex> lock(mutex);
 	int wsserver = ++lastId;
 	webSocketServerMap.emplace(std::make_pair(wsserver, ptr));
 	userPointerMap.emplace(std::make_pair(wsserver, nullptr));
@@ -377,7 +394,7 @@ int emplaceWebSocketServer(shared_ptr<WebSocketServer> ptr) {
 }
 
 void eraseWebSocketServer(int wsserver) {
-	std::lock_guard lock(mutex);
+	std::lock_guard<std::mutex> lock(mutex);
 	if (webSocketServerMap.erase(wsserver) == 0)
 		throw std::invalid_argument("WebSocketServer ID does not exist");
 	userPointerMap.erase(wsserver);
@@ -904,7 +921,7 @@ int rtcCreateDataChannelEx(int pc, const char *label, const rtcDataChannelInit *
 			}
 
 			dci.negotiated = init->negotiated;
-			dci.id = init->manualStream ? std::make_optional(init->stream) : nullopt;
+			dci.id = init->manualStream ? make_optional(init->stream) : nullopt;
 			dci.protocol = init->protocol ? init->protocol : "";
 		}
 
@@ -964,10 +981,10 @@ int rtcGetDataChannelReliability(int dc, rtcReliability *reliability) {
 		reliability->unordered = dcr.unordered;
 		if (dcr.type == Reliability::Type::Timed) {
 			reliability->unreliable = true;
-			reliability->maxPacketLifeTime = int(std::get<milliseconds>(dcr.rexmit).count());
+			reliability->maxPacketLifeTime = int(get<milliseconds>(dcr.rexmit).count());
 		} else if (dcr.type == Reliability::Type::Rexmit) {
 			reliability->unreliable = true;
-			reliability->maxRetransmits = std::get<int>(dcr.rexmit);
+			reliability->maxRetransmits = get<int>(dcr.rexmit);
 		} else {
 			reliability->unreliable = false;
 		}
@@ -1071,9 +1088,9 @@ int rtcAddTrackEx(int pc, const rtcTrackInit *init) {
 			throw std::invalid_argument("Unexpected codec");
 
 		auto desc = std::move(*optDescription);
-		desc.addSSRC(init->ssrc, init->name ? std::make_optional(string(init->name)) : nullopt,
-		             init->msid ? std::make_optional(string(init->msid)) : nullopt,
-		             init->trackId ? std::make_optional(string(init->trackId)) : nullopt);
+		desc.addSSRC(init->ssrc, init->name ? make_optional(string(init->name)) : nullopt,
+		             init->msid ? make_optional(string(init->msid)) : nullopt,
+		             init->trackId ? make_optional(string(init->trackId)) : nullopt);
 
 		int tr = emplaceTrack(peerConnection->addTrack(std::move(desc)));
 
@@ -1142,7 +1159,7 @@ void setSSRC(Description::Media *description, uint32_t ssrc, const char *_name, 
 }
 
 rtcMessage *rtcCreateOpaqueMessage(void *data, int size) {
-	auto src = reinterpret_cast<std::byte *>(data);
+	auto src = reinterpret_cast<byte *>(data);
 	auto msg = new Message(src, src + size);
 	// Downgrade the message pointer to the opaque rtcMessage* type
 	return reinterpret_cast<rtcMessage *>(msg);
@@ -1323,8 +1340,8 @@ int rtcGetSsrcsForType(const char *mediaType, const char *sdp, uint32_t *buffer,
 		auto description = Description(oldSDP, "unspec");
 		auto mediaCount = description.mediaCount();
 		for (unsigned int i = 0; i < mediaCount; i++) {
-			if (std::holds_alternative<Description::Media *>(description.media(i))) {
-				auto media = std::get<Description::Media *>(description.media(i));
+			if (holds_alternative<Description::Media *>(description.media(i))) {
+				auto media = get<Description::Media *>(description.media(i));
 				auto currentMediaType = lowercased(media->type());
 				if (currentMediaType == type) {
 					auto ssrcs = media->getSSRCs();
@@ -1344,8 +1361,8 @@ int rtcSetSsrcForType(const char *mediaType, const char *sdp, char *buffer, cons
 		auto description = Description(prevSDP, "unspec");
 		auto mediaCount = description.mediaCount();
 		for (unsigned int i = 0; i < mediaCount; i++) {
-			if (std::holds_alternative<Description::Media *>(description.media(i))) {
-				auto media = std::get<Description::Media *>(description.media(i));
+			if (holds_alternative<Description::Media *>(description.media(i))) {
+				auto media = get<Description::Media *>(description.media(i));
 				auto currentMediaType = lowercased(media->type());
 				if (currentMediaType == type) {
 					setSSRC(media, init->ssrc, init->name, init->msid, init->trackId);

@@ -89,7 +89,7 @@ void DataChannel::close() {
 
 	shared_ptr<SctpTransport> transport;
 	{
-		std::shared_lock lock(mMutex);
+		std::shared_lock<shared_mutex> lock(mMutex);
 		transport = mSctpTransport.lock();
 	}
 
@@ -110,33 +110,33 @@ void DataChannel::remoteClose() {
 
 optional<message_variant> DataChannel::receive() {
 	auto next = mRecvQueue.pop();
-	return next ? std::make_optional(to_variant(std::move(**next))) : nullopt;
+	return next ? make_optional(to_variant(std::move(**next))) : nullopt;
 }
 
 optional<message_variant> DataChannel::peek() {
 	auto next = mRecvQueue.peek();
-	return next ? std::make_optional(to_variant(**next)) : nullopt;
+	return next ? make_optional(to_variant(**next)) : nullopt;
 }
 
 size_t DataChannel::availableAmount() const { return mRecvQueue.amount(); }
 
 optional<uint16_t> DataChannel::stream() const {
-	std::shared_lock lock(mMutex);
+	std::shared_lock<shared_mutex>lock(mMutex);
 	return mStream;
 }
 
 string DataChannel::label() const {
-	std::shared_lock lock(mMutex);
+	std::shared_lock<shared_mutex>lock(mMutex);
 	return mLabel;
 }
 
 string DataChannel::protocol() const {
-	std::shared_lock lock(mMutex);
+	std::shared_lock<shared_mutex>lock(mMutex);
 	return mProtocol;
 }
 
 Reliability DataChannel::reliability() const {
-	std::shared_lock lock(mMutex);
+	std::shared_lock<shared_mutex>lock(mMutex);
 	return *mReliability;
 }
 
@@ -150,7 +150,7 @@ size_t DataChannel::maxMessageSize() const {
 }
 
 void DataChannel::assignStream(uint16_t stream) {
-	std::unique_lock lock(mMutex);
+	std::unique_lock<shared_mutex> lock(mMutex);
 
 	if (mStream.has_value())
 		throw std::logic_error("DataChannel already has a stream assigned");
@@ -160,7 +160,7 @@ void DataChannel::assignStream(uint16_t stream) {
 
 void DataChannel::open(shared_ptr<SctpTransport> transport) {
 	{
-		std::unique_lock lock(mMutex);
+		std::unique_lock<shared_mutex> lock(mMutex);
 		mSctpTransport = transport;
 	}
 
@@ -175,7 +175,7 @@ void DataChannel::processOpenMessage(message_ptr) {
 bool DataChannel::outgoing(message_ptr message) {
 	shared_ptr<SctpTransport> transport;
 	{
-		std::shared_lock lock(mMutex);
+		std::shared_lock<shared_mutex>lock(mMutex);
 		transport = mSctpTransport.lock();
 
 		if (!transport || mIsClosed)
@@ -240,7 +240,7 @@ OutgoingDataChannel::OutgoingDataChannel(weak_ptr<PeerConnection> pc, string lab
 OutgoingDataChannel::~OutgoingDataChannel() {}
 
 void OutgoingDataChannel::open(shared_ptr<SctpTransport> transport) {
-	std::unique_lock lock(mMutex);
+	std::unique_lock<shared_mutex> lock(mMutex);
 	mSctpTransport = transport;
 
 	if (!mStream.has_value())
@@ -251,12 +251,12 @@ void OutgoingDataChannel::open(shared_ptr<SctpTransport> transport) {
 	switch (mReliability->type) {
 	case Reliability::Type::Rexmit:
 		channelType = CHANNEL_PARTIAL_RELIABLE_REXMIT;
-		reliabilityParameter = uint32_t(std::max(std::get<int>(mReliability->rexmit), 0));
+		reliabilityParameter = uint32_t(std::max(get<int>(mReliability->rexmit), 0));
 		break;
 
 	case Reliability::Type::Timed:
 		channelType = CHANNEL_PARTIAL_RELIABLE_TIMED;
-		reliabilityParameter = uint32_t(std::get<milliseconds>(mReliability->rexmit).count());
+		reliabilityParameter = uint32_t(get<milliseconds>(mReliability->rexmit).count());
 		break;
 
 	default:
@@ -269,7 +269,7 @@ void OutgoingDataChannel::open(shared_ptr<SctpTransport> transport) {
 		channelType |= 0x80;
 
 	const size_t len = sizeof(OpenMessage) + mLabel.size() + mProtocol.size();
-	binary buffer(len, byte(0));
+	binary buffer(len, to_byte(0));
 	auto &open = *reinterpret_cast<OpenMessage *>(buffer.data());
 	open.type = MESSAGE_OPEN;
 	open.channelType = channelType;
@@ -305,7 +305,7 @@ void IncomingDataChannel::open(shared_ptr<SctpTransport>) {
 }
 
 void IncomingDataChannel::processOpenMessage(message_ptr message) {
-	std::unique_lock lock(mMutex);
+	std::unique_lock<shared_mutex> lock(mMutex);
 	auto transport = mSctpTransport.lock();
 	if (!transport)
 		throw std::logic_error("DataChannel has no transport");
@@ -346,7 +346,7 @@ void IncomingDataChannel::processOpenMessage(message_ptr message) {
 
 	lock.unlock();
 
-	binary buffer(sizeof(AckMessage), byte(0));
+	binary buffer(sizeof(AckMessage), to_byte(0));
 	auto &ack = *reinterpret_cast<AckMessage *>(buffer.data());
 	ack.type = MESSAGE_ACK;
 

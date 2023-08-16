@@ -26,9 +26,8 @@ using std::chrono::system_clock;
 namespace {
 
 using std::string;
-using std::string_view;
 
-inline bool match_prefix(string_view str, string_view prefix) {
+inline bool match_prefix(rtc::string_view str, rtc::string_view prefix) {
 	return str.size() >= prefix.size() &&
 	       std::mismatch(prefix.begin(), prefix.end(), str.begin()).first == prefix.end();
 }
@@ -44,9 +43,10 @@ inline void trim_end(string &str) {
 	    str.end());
 }
 
-inline std::pair<string_view, string_view> parse_pair(string_view attr) {
-	string_view key, value;
-	if (size_t separator = attr.find(':'); separator != string::npos) {
+inline std::pair<rtc::string_view, rtc::string_view> parse_pair(rtc::string_view attr) {
+	rtc::string_view key, value;
+	size_t separator = attr.find(':');
+	if (separator != string::npos) {
 		key = attr.substr(0, separator);
 		value = attr.substr(separator + 1);
 	} else {
@@ -55,7 +55,7 @@ inline std::pair<string_view, string_view> parse_pair(string_view attr) {
 	return std::make_pair(std::move(key), std::move(value));
 }
 
-template <typename T> T to_integer(string_view s) {
+template <typename T> T to_integer(rtc::string_view s) {
 	const string str(s);
 	try {
 		return std::is_signed<T>::value ? T(std::stol(str)) : T(std::stoul(str));
@@ -64,7 +64,7 @@ template <typename T> T to_integer(string_view s) {
 	}
 }
 
-inline bool is_sha256_fingerprint(string_view f) {
+inline bool is_sha256_fingerprint(rtc::string_view f) {
 	if (f.size() != 32 * 3 - 1)
 		return false;
 
@@ -79,6 +79,8 @@ inline bool is_sha256_fingerprint(string_view f) {
 	}
 	return true;
 }
+
+inline std::string to_string(rtc::string_view s) { return std::string(s.begin(), s.end()); }
 
 } // namespace
 
@@ -109,7 +111,9 @@ Description::Description(const string &sdp, Type type, Role role)
 
 		} else if (match_prefix(line, "a=")) { // Attribute line
 			string attr = line.substr(2);
-			auto [key, value] = parse_pair(attr);
+			string_view key;
+			string_view value;
+			std::tie(key, value) = parse_pair(attr);
 
 			if (key == "setup") {
 				if (value == "active")
@@ -128,9 +132,9 @@ Description::Description(const string &sdp, Type type, Role role)
 					PLOG_WARNING << "Unknown SDP fingerprint format: " << value;
 				}
 			} else if (key == "ice-ufrag") {
-				mIceUfrag = value;
+				mIceUfrag = to_string(value);
 			} else if (key == "ice-pwd") {
-				mIcePwd = value;
+				mIcePwd = to_string(value);
 			} else if (key == "ice-options") {
 				mIceOptions = utils::explode(string(value), ',');
 			} else if (key == "candidate") {
@@ -636,10 +640,11 @@ string Description::Entry::generateSdpLines(string_view eol) const {
 void Description::Entry::parseSdpLine(string_view line) {
 	if (match_prefix(line, "a=")) {
 		string_view attr = line.substr(2);
-		auto [key, value] = parse_pair(attr);
+		string_view key, value;
+		std::tie(key, value) = parse_pair(attr);
 
 		if (key == "mid") {
-			mMid = value;
+			mMid = to_string(value);
 		} else if (key == "extmap") {
 			auto id = Description::Media::ExtMap::parseId(value);
 			auto it = mExtMaps.find(id);
@@ -709,10 +714,10 @@ void Description::Entry::ExtMap::setDescription(string_view description) {
 	const size_t attributeSplit = uriAndAttributes.find(' ');
 
 	if (attributeSplit == string::npos)
-		this->uri = uriAndAttributes;
+		this->uri = to_string(uriAndAttributes);
 	else {
-		this->uri = uriAndAttributes.substr(0, attributeSplit);
-		this->attributes = uriAndAttributes.substr(attributeSplit + 1);
+		this->uri = to_string(uriAndAttributes.substr(0, attributeSplit));
+		this->attributes = to_string(uriAndAttributes.substr(attributeSplit + 1));
 	}
 }
 
@@ -811,7 +816,8 @@ string Description::Application::generateSdpLines(string_view eol) const {
 void Description::Application::parseSdpLine(string_view line) {
 	if (match_prefix(line, "a=")) {
 		string_view attr = line.substr(2);
-		auto [key, value] = parse_pair(attr);
+		string_view key, value;
+		std::tie(key, value) = parse_pair(attr);
 
 		if (key == "sctp-port") {
 			mSctpPort = ::to_integer<uint16_t>(value);
@@ -988,7 +994,8 @@ string Description::Media::generateSdpLines(string_view eol) const {
 void Description::Media::parseSdpLine(string_view line) {
 	if (match_prefix(line, "a=")) {
 		string_view attr = line.substr(2);
-		auto [key, value] = parse_pair(attr);
+		string_view key, value;
+		std::tie(key, value) = parse_pair(attr);
 
 		if (key == "rtpmap") {
 			auto pt = Description::Media::RtpMap::parsePayloadType(value);
@@ -1027,7 +1034,7 @@ void Description::Media::parseSdpLine(string_view line) {
 			auto cnamePos = value.find("cname:");
 			if (cnamePos != string::npos) {
 				auto cname = value.substr(cnamePos + 6);
-				mCNameMap.emplace(ssrc, cname);
+				mCNameMap.emplace(std::make_pair(ssrc, to_string(cname)));
 			}
 			mAttributes.emplace_back(attr);
 
@@ -1066,7 +1073,7 @@ void Description::Media::RtpMap::setDescription(string_view description) {
 	if (spl == string::npos)
 		throw std::invalid_argument("Invalid format description");
 
-	this->format = line.substr(0, spl);
+	this->format = to_string(line.substr(0, spl));
 
 	line = line.substr(spl + 1);
 	spl = line.find('/');
@@ -1077,7 +1084,7 @@ void Description::Media::RtpMap::setDescription(string_view description) {
 		this->clockRate = ::to_integer<int>(line);
 	else {
 		this->clockRate = ::to_integer<int>(line.substr(0, spl));
-		this->encParams = line.substr(spl + 1);
+		this->encParams = to_string(line.substr(spl + 1));
 	}
 }
 

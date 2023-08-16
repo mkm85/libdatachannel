@@ -54,8 +54,8 @@ int main(int argc, char **argv) {
 	    [&]() { std::cout << "[DataChannel closed: " << dc->label() << "]" << std::endl; });
 
 	dc->onMessage([](auto data) {
-		if (std::holds_alternative<std::string>(data)) {
-			std::cout << "[Received: " << std::get<std::string>(data) << "]" << std::endl;
+		if (rtc::holds_alternative<std::string>(data)) {
+			std::cout << "[Received: " << rtc::get<std::string>(data) << "]" << std::endl;
 		}
 	});
 

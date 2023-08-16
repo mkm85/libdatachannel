@@ -16,7 +16,6 @@
 #include <cstring>
 #include <exception>
 
-using std::to_integer;
 using std::to_string;
 
 namespace rtc {
@@ -74,7 +73,7 @@ DtlsSrtpTransport::~DtlsSrtpTransport() {
 }
 
 bool DtlsSrtpTransport::sendMedia(message_ptr message) {
-	std::lock_guard lock(sendMutex);
+	std::lock_guard<std::mutex> lock(sendMutex);
 	if (!message)
 		return false;
 

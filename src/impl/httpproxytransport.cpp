@@ -102,7 +102,7 @@ string HttpProxyTransport::generateHttpRequest() {
 	return "CONNECT " + mHostname + ":" + mService + " HTTP/1.1\r\nHost: " + mHostname + "\r\n\r\n";
 }
 
-size_t HttpProxyTransport::parseHttpResponse(std::byte *buffer, size_t size) {
+size_t HttpProxyTransport::parseHttpResponse(byte *buffer, size_t size) {
 	std::list<string> lines;
 	size_t length = parseHttpLines(buffer, size, lines);
 	if (length == 0)

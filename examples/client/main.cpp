@@ -90,10 +90,10 @@ int main(int argc, char **argv) try {
 
 	ws->onMessage([&config, wws = make_weak_ptr(ws)](auto data) {
 		// data holds either std::string or rtc::binary
-		if (!std::holds_alternative<std::string>(data))
+		if (!rtc::holds_alternative<std::string>(data))
 			return;
 
-		json message = json::parse(std::get<std::string>(data));
+		json message = json::parse(rtc::get<std::string>(data));
 
 		auto it = message.find("id");
 		if (it == message.end())
@@ -108,7 +108,8 @@ int main(int argc, char **argv) try {
 		auto type = it->get<std::string>();
 
 		shared_ptr<rtc::PeerConnection> pc;
-		if (auto jt = peerConnectionMap.find(id); jt != peerConnectionMap.end()) {
+		auto jt = peerConnectionMap.find(id);
+		if (jt != peerConnectionMap.end()) {
 			pc = jt->second;
 		} else if (type == "offer") {
 			std::cout << "Answering to " + id << std::endl;
@@ -170,12 +171,12 @@ int main(int argc, char **argv) try {
 
 		dc->onMessage([id, wdc = make_weak_ptr(dc)](auto data) {
 			// data holds either std::string or rtc::binary
-			if (std::holds_alternative<std::string>(data))
-				std::cout << "Message from " << id << " received: " << std::get<std::string>(data)
+			if (rtc::holds_alternative<std::string>(data))
+				std::cout << "Message from " << id << " received: " << rtc::get<std::string>(data)
 				          << std::endl;
 			else
 				std::cout << "Binary message from " << id
-				          << " received, size=" << std::get<rtc::binary>(data).size() << std::endl;
+				          << " received, size=" << rtc::get<rtc::binary>(data).size() << std::endl;
 		});
 
 		dataChannelMap.emplace(id, dc);
@@ -238,12 +239,17 @@ shared_ptr<rtc::PeerConnection> createPeerConnection(const rtc::Configuration &c
 
 		dc->onMessage([id](auto data) {
 			// data holds either std::string or rtc::binary
-			if (std::holds_alternative<std::string>(data))
-				std::cout << "Message from " << id << " received: " << std::get<std::string>(data)
-				          << std::endl;
+			if (rtc::holds_alternative<std::string>(data)) {
+				std::string d = rtc::get<std::string>(data);
+				std::cout << "Message from " << id << " received: " << d
+			          << std::endl;
+			}
 			else
+			{
+				rtc::binary d = rtc::get<rtc::binary>(data);
 				std::cout << "Binary message from " << id
-				          << " received, size=" << std::get<rtc::binary>(data).size() << std::endl;
+				          << " received, size=" << d.size() << std::endl;
+			}
 		});
 
 		dataChannelMap.emplace(id, dc);

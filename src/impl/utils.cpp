@@ -34,8 +34,6 @@ namespace rtc {
 namespace impl {
 namespace utils {
 
-using std::to_integer;
-
 std::vector<string> explode(const string &str, char delim) {
 	std::vector<std::string> result;
 	std::istringstream ss(str);

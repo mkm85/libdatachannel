@@ -64,7 +64,7 @@ std::pair<std::shared_ptr<StreamSource>, Stream::StreamSourceType> Stream::unsaf
 }
 
 void Stream::sendSample() {
-    std::lock_guard lock(mutex);
+    std::lock_guard<std::mutex> lock(mutex);
     if (!isRunning) {
         return;
     }
@@ -84,7 +84,7 @@ void Stream::onSample(std::function<void (StreamSourceType, uint64_t, rtc::binar
 }
 
 void Stream::start() {
-    std::lock_guard lock(mutex);
+    std::lock_guard<std::mutex> lock(mutex);
     if (isRunning) {
         return;
     }
@@ -98,7 +98,7 @@ void Stream::start() {
 }
 
 void Stream::stop() {
-    std::lock_guard lock(mutex);
+    std::lock_guard<std::mutex> lock(mutex);
     if (!isRunning) {
         return;
     }
@@ -107,4 +107,3 @@ void Stream::stop() {
     audio->stop();
     video->stop();
 };
-

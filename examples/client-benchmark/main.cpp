@@ -50,8 +50,8 @@ std::string randomId(size_t length);
 // Benchmark
 const size_t messageSize = 65535;
 rtc::binary messageData(messageSize);
-std::unordered_map<std::string, std::atomic<size_t>> receivedSizeMap;
-std::unordered_map<std::string, std::atomic<size_t>> sentSizeMap;
+std::unordered_map<std::string, std::atomic<size_t> > receivedSizeMap;
+std::unordered_map<std::string, std::atomic<size_t> > sentSizeMap;
 bool noSend = false;
 
 // Benchmark - enableThroughputSet params
@@ -67,7 +67,7 @@ int main(int argc, char **argv) try {
 	rtc::InitLogger(rtc::LogLevel::Info);
 
 	// Benchmark - construct message to send
-	fill(messageData.begin(), messageData.end(), std::byte(0xFF));
+	fill(messageData.begin(), messageData.end(), rtc::to_byte(0xFF));
 
 	// Benchmark - enableThroughputSet params
 	enableThroughputSet = params.enableThroughputSet();
@@ -115,10 +115,10 @@ int main(int argc, char **argv) try {
 	ws->onClosed([]() { std::cout << "WebSocket closed" << std::endl; });
 
 	ws->onMessage([&config, wws = make_weak_ptr(ws)](auto data) {
-		if (!std::holds_alternative<std::string>(data))
+		if (!rtc::holds_alternative<std::string>(data))
 			return;
 
-		json message = json::parse(std::get<std::string>(data));
+		json message = json::parse(rtc::get<std::string>(data));
 
 		auto it = message.find("id");
 		if (it == message.end())
@@ -133,7 +133,8 @@ int main(int argc, char **argv) try {
 		auto type = it->get<std::string>();
 
 		shared_ptr<rtc::PeerConnection> pc;
-		if (auto jt = peerConnectionMap.find(id); jt != peerConnectionMap.end()) {
+		auto jt = peerConnectionMap.find(id);
+		if (jt != peerConnectionMap.end()) {
 			pc = jt->second;
 		} else if (type == "offer") {
 			std::cout << "Answering to " + id << std::endl;
@@ -185,8 +186,8 @@ int main(int argc, char **argv) try {
 		const std::string label = "DC-" + std::to_string(i);
 		std::cout << "Creating DataChannel with label \"" << label << "\"" << std::endl;
 		auto dc = pc->createDataChannel(label);
-		receivedSizeMap.emplace(label, 0);
-		sentSizeMap.emplace(label, 0);
+		receivedSizeMap.emplace(std::piecewise_construct, std::forward_as_tuple(label), std::forward_as_tuple(0));
+		sentSizeMap.emplace(std::piecewise_construct, std::forward_as_tuple(label), std::forward_as_tuple(0));
 
 		// Set Buffer Size
 		dc->setBufferedAmountLowThreshold(bufferSize);
@@ -236,8 +237,8 @@ int main(int argc, char **argv) try {
 		dc->onClosed([id]() { std::cout << "DataChannel from " << id << " closed" << std::endl; });
 
 		dc->onMessage([id, wdc = make_weak_ptr(dc), label](auto data) {
-			if (std::holds_alternative<rtc::binary>(data))
-				receivedSizeMap.at(label) += std::get<rtc::binary>(data).size();
+			if (rtc::holds_alternative<rtc::binary>(data))
+				receivedSizeMap.at(label) += rtc::get<rtc::binary>(data).size();
 		});
 
 		dataChannelMap.emplace(label, dc);
@@ -266,9 +267,11 @@ int main(int argc, char **argv) try {
 			    byteToSendOnEveryLoop * ((elapsedTimeInSecs * 1000.0) / stepDurationInMs));
 
 			rtc::binary tempMessageData(byteToSendThisLoop);
-			fill(tempMessageData.begin(), tempMessageData.end(), std::byte(0xFF));
+			fill(tempMessageData.begin(), tempMessageData.end(), rtc::to_byte(0xFF));
 
-			for (const auto &[label, dc] : dataChannelMap) {
+			for (const auto entry : dataChannelMap) {
+				std::string label = entry.first;
+				std::shared_ptr<rtc::DataChannel> dc = entry.second;
 				if (dc->isOpen() && dc->bufferedAmount() <= bufferSize * byteToSendOnEveryLoop) {
 					dc->send(tempMessageData);
 					sentSizeMap.at(label) += tempMessageData.size();
@@ -284,7 +287,10 @@ int main(int argc, char **argv) try {
 			unsigned long receiveSpeedTotal = 0;
 			unsigned long sendSpeedTotal = 0;
 			std::cout << "#" << i / STEP_COUNT_FOR_1_SEC << std::endl;
-			for (const auto &[label, dc] : dataChannelMap) {
+			for (auto const entry : dataChannelMap) {
+				std::string label = entry.first;
+				std::shared_ptr<rtc::DataChannel> dc = entry.second;
+
 				unsigned long channelReceiveSpeed = static_cast<int>(
 				    receivedSizeMap[label].exchange(0) / (elapsedTimeInSecs * 1000));
 				unsigned long channelSendSpeed =
@@ -373,8 +379,9 @@ shared_ptr<rtc::PeerConnection> createPeerConnection(const rtc::Configuration &c
 		std::cout << "### Check other peer's screen for stats ###" << std::endl;
 		std::cout << "###########################################" << std::endl;
 
-		receivedSizeMap.emplace(dc->label(), 0);
-		sentSizeMap.emplace(dc->label(), 0);
+		std::atomic<size_t> zero = {0};
+		receivedSizeMap.emplace(std::piecewise_construct, std::forward_as_tuple(dc->label()), std::forward_as_tuple(0));
+		sentSizeMap.emplace(std::piecewise_construct, std::forward_as_tuple(dc->label()), std::forward_as_tuple(0));
 
 		// Set Buffer Size
 		dc->setBufferedAmountLowThreshold(bufferSize);
@@ -418,7 +425,7 @@ shared_ptr<rtc::PeerConnection> createPeerConnection(const rtc::Configuration &c
 						                     ((elapsedTimeInSecs * 1000.0) / stepDurationInMs));
 
 						rtc::binary tempMessageData(byteToSendThisLoop);
-						fill(tempMessageData.begin(), tempMessageData.end(), std::byte(0xFF));
+						fill(tempMessageData.begin(), tempMessageData.end(), rtc::to_byte(0xFF));
 
 						if (dcLocked->bufferedAmount() <= bufferSize) {
 							dcLocked->send(tempMessageData);
@@ -457,8 +464,8 @@ shared_ptr<rtc::PeerConnection> createPeerConnection(const rtc::Configuration &c
 		dc->onClosed([id]() { std::cout << "DataChannel from " << id << " closed" << std::endl; });
 
 		dc->onMessage([id, wdc = make_weak_ptr(dc), label](auto data) {
-			if (std::holds_alternative<rtc::binary>(data))
-				receivedSizeMap.at(label) += std::get<rtc::binary>(data).size();
+			if (rtc::holds_alternative<rtc::binary>(data))
+				receivedSizeMap.at(label) += rtc::get<rtc::binary>(data).size();
 		});
 
 		dataChannelMap.emplace(label, dc);

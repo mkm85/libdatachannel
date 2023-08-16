@@ -36,22 +36,22 @@ Track::~Track() {
 }
 
 string Track::mid() const {
-	std::shared_lock lock(mMutex);
+	std::shared_lock<shared_mutex>lock(mMutex);
 	return mMediaDescription.mid();
 }
 
 Description::Direction Track::direction() const {
-	std::shared_lock lock(mMutex);
+	std::shared_lock<shared_mutex>lock(mMutex);
 	return mMediaDescription.direction();
 }
 
 Description::Media Track::description() const {
-	std::shared_lock lock(mMutex);
+	std::shared_lock<shared_mutex>lock(mMutex);
 	return mMediaDescription;
 }
 
 void Track::setDescription(Description::Media description) {
-	std::unique_lock lock(mMutex);
+	std::unique_lock<shared_mutex> lock(mMutex);
 	if (description.mid() != mMediaDescription.mid())
 		throw std::logic_error("Media description mid does not match track mid");
 
@@ -94,7 +94,7 @@ size_t Track::availableAmount() const { return mRecvQueue.amount(); }
 
 bool Track::isOpen(void) const {
 #if RTC_ENABLE_MEDIA
-	std::shared_lock lock(mMutex);
+	std::shared_lock<shared_mutex>lock(mMutex);
 	return !mIsClosed && mDtlsSrtpTransport.lock();
 #else
 	return false;
@@ -114,7 +114,7 @@ size_t Track::maxMessageSize() const {
 #if RTC_ENABLE_MEDIA
 void Track::open(shared_ptr<DtlsSrtpTransport> transport) {
 	{
-		std::lock_guard lock(mMutex);
+		std::lock_guard<shared_mutex> lock(mMutex);
 		mDtlsSrtpTransport = transport;
 	}
 
@@ -182,7 +182,7 @@ bool Track::transportSend([[maybe_unused]] message_ptr message) {
 #if RTC_ENABLE_MEDIA
 	shared_ptr<DtlsSrtpTransport> transport;
 	{
-		std::shared_lock lock(mMutex);
+		std::shared_lock<shared_mutex>lock(mMutex);
 		transport = mDtlsSrtpTransport.lock();
 		if (!transport)
 			throw std::runtime_error("Track is closed");
@@ -207,7 +207,7 @@ void Track::setMediaHandler(shared_ptr<MediaHandler> handler) {
 		currentHandler->onOutgoing(nullptr);
 
 	{
-		std::unique_lock lock(mMutex);
+		std::unique_lock<shared_mutex> lock(mMutex);
 		mMediaHandler = handler;
 	}
 
@@ -216,7 +216,7 @@ void Track::setMediaHandler(shared_ptr<MediaHandler> handler) {
 }
 
 shared_ptr<MediaHandler> Track::getMediaHandler() {
-	std::shared_lock lock(mMutex);
+	std::shared_lock<shared_mutex>lock(mMutex);
 	return mMediaHandler;
 }
 

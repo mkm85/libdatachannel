@@ -105,7 +105,8 @@ void WebSocket::open(const string &url) {
 	if (path.empty())
 		path += '/';
 
-	if (string query = m[15]; !query.empty())
+	string query = m[15];
+	if (!query.empty())
 		path += "?" + query;
 
 	mHostname = hostname; // for TLS SNI and Proxy
@@ -148,12 +149,12 @@ size_t WebSocket::maxMessageSize() const { return DEFAULT_MAX_MESSAGE_SIZE; }
 
 optional<message_variant> WebSocket::receive() {
 	auto next = mRecvQueue.pop();
-	return next ? std::make_optional(to_variant(std::move(**next))) : nullopt;
+	return next ? make_optional(to_variant(std::move(**next))) : nullopt;
 }
 
 optional<message_variant> WebSocket::peek() {
 	auto next = mRecvQueue.peek();
-	return next ? std::make_optional(to_variant(std::move(**next))) : nullopt;
+	return next ? make_optional(to_variant(std::move(**next))) : nullopt;
 }
 
 size_t WebSocket::availableAmount() const { return mRecvQueue.amount(); }
@@ -216,7 +217,7 @@ shared_ptr<TcpTransport> WebSocket::setTcpTransport(shared_ptr<TcpTransport> tra
 
 		transport->onBufferedAmount(weak_bind(&WebSocket::triggerBufferedAmount, this, _1));
 
-		transport->onStateChange([this, weak_this = weak_from_this()](State transportState) {
+		transport->onStateChange([this, weak_this = rtc::weak_from_this(this)](State transportState) {
 			auto shared_this = weak_this.lock();
 			if (!shared_this)
 				return;
@@ -269,7 +270,7 @@ shared_ptr<HttpProxyTransport> WebSocket::initProxyTransport() {
 		if (!lower)
 			throw std::logic_error("No underlying TCP transport for Proxy transport");
 
-		auto stateChangeCallback = [this, weak_this = weak_from_this()](State transportState) {
+		auto stateChangeCallback = [this, weak_this = rtc::weak_from_this(this)](State transportState) {
 			auto shared_this = weak_this.lock();
 			if (!shared_this)
 				return;
@@ -327,7 +328,7 @@ shared_ptr<TlsTransport> WebSocket::initTlsTransport() {
 			lower = transport;
 		}
 
-		auto stateChangeCallback = [this, weak_this = weak_from_this()](State transportState) {
+		auto stateChangeCallback = [this, weak_this = rtc::weak_from_this(this)](State transportState) {
 			auto shared_this = weak_this.lock();
 			if (!shared_this)
 				return;
@@ -405,7 +406,7 @@ shared_ptr<WsTransport> WebSocket::initWsTransport() {
 		if (!atomic_load(&mWsHandshake))
 			atomic_store(&mWsHandshake, std::make_shared<WsHandshake>());
 
-		auto stateChangeCallback = [this, weak_this = weak_from_this()](State transportState) {
+		auto stateChangeCallback = [this, weak_this = rtc::weak_from_this(this)](State transportState) {
 			auto shared_this = weak_this.lock();
 			if (!shared_this)
 				return;
@@ -504,7 +505,7 @@ void WebSocket::scheduleConnectionTimeout() {
 	auto defaultTimeout = 30s;
 	auto timeout = config.connectionTimeout.value_or(milliseconds(defaultTimeout));
 	if (timeout > milliseconds::zero()) {
-		ThreadPool::Instance().schedule(timeout, [weak_this = weak_from_this()]() {
+		ThreadPool::Instance().schedule(timeout, [weak_this = rtc::weak_from_this(this)]() {
 			if (auto locked = weak_this.lock()) {
 				if (locked->state == WebSocket::State::Connecting) {
 					PLOG_WARNING << "WebSocket connection timed out";

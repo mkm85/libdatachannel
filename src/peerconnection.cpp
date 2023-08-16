@@ -73,7 +73,7 @@ bool PeerConnection::hasMedia() const {
 }
 
 void PeerConnection::setLocalDescription(Description::Type type) {
-	std::unique_lock signalingLock(impl()->signalingMutex);
+	std::unique_lock<std::mutex> signalingLock(impl()->signalingMutex);
 	PLOG_VERBOSE << "Setting local description, type=" << Description::typeToString(type);
 
 	SignalingState signalingState = impl()->signalingState.load();
@@ -148,7 +148,7 @@ void PeerConnection::setLocalDescription(Description::Type type) {
 }
 
 void PeerConnection::setRemoteDescription(Description description) {
-	std::unique_lock signalingLock(impl()->signalingMutex);
+	std::unique_lock<std::mutex> signalingLock(impl()->signalingMutex);
 	PLOG_VERBOSE << "Setting remote description: " << string(description);
 
 	if (description.type() == Description::Type::Rollback) {
@@ -240,7 +240,7 @@ void PeerConnection::setRemoteDescription(Description description) {
 }
 
 void PeerConnection::addRemoteCandidate(Candidate candidate) {
-	std::unique_lock signalingLock(impl()->signalingMutex);
+	std::unique_lock<std::mutex> signalingLock(impl()->signalingMutex);
 	PLOG_VERBOSE << "Adding remote candidate: " << string(candidate);
 	impl()->processRemoteCandidate(std::move(candidate));
 }

@@ -29,7 +29,7 @@ public:
 class Stream: std::enable_shared_from_this<Stream> {
     uint64_t startTime = 0;
     std::mutex mutex;
-    DispatchQueue dispatchQueue = DispatchQueue("StreamQueue");
+    DispatchQueue dispatchQueue = {"StreamQueue"};
 
     bool _isRunning = false;
 public:

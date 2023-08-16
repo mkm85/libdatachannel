@@ -39,7 +39,7 @@ void PollService::start() {
 }
 
 void PollService::join() {
-	std::unique_lock lock(mMutex);
+	std::unique_lock<std::recursive_mutex> lock(mMutex);
 	if (std::exchange(mStopped, true))
 		return;
 
@@ -56,11 +56,11 @@ void PollService::add(socket_t sock, Params params) {
 	assert(sock != INVALID_SOCKET);
 	assert(params.callback);
 
-	std::unique_lock lock(mMutex);
+	std::unique_lock<std::recursive_mutex> lock(mMutex);
 	PLOG_VERBOSE << "Registering socket in poll service, direction=" << params.direction;
-	auto until = params.timeout ? std::make_optional(clock::now() + *params.timeout) : nullopt;
+	auto until = params.timeout ? make_optional(clock::now() + *params.timeout) : nullopt;
 	assert(mSocks);
-	mSocks->insert_or_assign(sock, SocketEntry{std::move(params), std::move(until)});
+	(*mSocks)[sock] = SocketEntry{std::move(params), std::move(until)};
 
 	assert(mInterrupter);
 	mInterrupter->interrupt();
@@ -69,7 +69,7 @@ void PollService::add(socket_t sock, Params params) {
 void PollService::remove(socket_t sock) {
 	assert(sock != INVALID_SOCKET);
 
-	std::unique_lock lock(mMutex);
+	std::unique_lock<std::recursive_mutex> lock(mMutex);
 	PLOG_VERBOSE << "Unregistering socket in poll service";
 	assert(mSocks);
 	mSocks->erase(sock);
@@ -79,13 +79,18 @@ void PollService::remove(socket_t sock) {
 }
 
 void PollService::prepare(std::vector<struct pollfd> &pfds, optional<clock::time_point> &next) {
-	std::unique_lock lock(mMutex);
+	std::unique_lock<std::recursive_mutex> lock(mMutex);
 	pfds.resize(1 + mSocks->size());
 	next.reset();
 
 	auto it = pfds.begin();
 	mInterrupter->prepare(*it++);
-	for (const auto &[sock, entry] : *mSocks) {
+	socket_t sock;
+	SocketEntry entry;
+	for (auto const data : *mSocks) {
+		socket_t sock = data.first;
+		SocketEntry entry = data.second;
+
 		it->fd = sock;
 		switch (entry.params.direction) {
 		case Direction::In:
@@ -106,7 +111,7 @@ void PollService::prepare(std::vector<struct pollfd> &pfds, optional<clock::time
 }
 
 void PollService::process(std::vector<struct pollfd> &pfds) {
-	std::unique_lock lock(mMutex);
+	std::unique_lock<std::recursive_mutex> lock(mMutex);
 	auto it = pfds.begin();
 	if (it != pfds.end()) {
 		mInterrupter->process(*it++);
@@ -127,7 +132,7 @@ void PollService::process(std::vector<struct pollfd> &pfds) {
 
 				} else if (it->revents & POLLIN || it->revents & POLLOUT || it->revents & POLLHUP) {
 					entry.until = params.timeout
-					                  ? std::make_optional(clock::now() + *params.timeout)
+					                  ? make_optional(clock::now() + *params.timeout)
 					                  : nullopt;
 
 					auto callback = params.callback;

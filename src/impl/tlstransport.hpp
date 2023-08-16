@@ -53,7 +53,7 @@ protected:
 	const bool mIsClient;
 
 	Queue<message_ptr> mIncomingQueue;
-	std::atomic<int> mPendingRecvCount = 0;
+	std::atomic<int> mPendingRecvCount = { 0 };
 	std::mutex mRecvMutex;
 
 #if USE_GNUTLS
@@ -74,7 +74,7 @@ protected:
 	mbedtls_ssl_context mSsl;
 
 	std::mutex mSslMutex;
-	std::atomic<bool> mOutgoingResult = true;
+	std::atomic<bool> mOutgoingResult = { true };
 
 	message_ptr mIncomingMessage;
 	size_t mIncomingMessagePosition = 0;

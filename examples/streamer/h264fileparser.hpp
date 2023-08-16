@@ -11,7 +11,6 @@
 #define h264fileparser_hpp
 
 #include "fileparser.hpp"
-#include <optional>
 
 class H264FileParser: public FileParser {
     std::optional<std::vector<std::byte>> previousUnitType5 = std::nullopt;

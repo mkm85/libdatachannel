@@ -22,25 +22,25 @@ ThreadPool::ThreadPool() {}
 ThreadPool::~ThreadPool() {}
 
 int ThreadPool::count() const {
-	std::unique_lock lock(mWorkersMutex);
+	std::unique_lock<std::mutex> lock(mWorkersMutex);
 	return int(mWorkers.size());
 }
 
 void ThreadPool::spawn(int count) {
-	std::unique_lock lock(mWorkersMutex);
+	std::unique_lock<std::mutex> lock(mWorkersMutex);
 	while (count-- > 0)
 		mWorkers.emplace_back(std::bind(&ThreadPool::run, this));
 }
 
 void ThreadPool::join() {
 	{
-		std::unique_lock lock(mMutex);
+		std::unique_lock<std::mutex> lock(mMutex);
 		mWaitingCondition.wait(lock, [&]() { return mBusyWorkers == 0; });
 		mJoining = true;
 		mTasksCondition.notify_all();
 	}
 
-	std::unique_lock lock(mWorkersMutex);
+	std::unique_lock<std::mutex> lock(mWorkersMutex);
 	for (auto &w : mWorkers)
 		w.join();
 
@@ -50,7 +50,7 @@ void ThreadPool::join() {
 }
 
 void ThreadPool::clear() {
-	std::unique_lock lock(mMutex);
+	std::unique_lock<std::mutex> lock(mMutex);
 	while (!mTasks.empty())
 		mTasks.pop();
 }
@@ -72,9 +72,9 @@ bool ThreadPool::runOne() {
 }
 
 std::function<void()> ThreadPool::dequeue() {
-	std::unique_lock lock(mMutex);
+	std::unique_lock<std::mutex> lock(mMutex);
 	while (!mJoining) {
-		std::optional<clock::time_point> time;
+		optional<clock::time_point> time;
 		if (!mTasks.empty()) {
 			time = mTasks.top().time;
 			if (*time <= clock::now()) {

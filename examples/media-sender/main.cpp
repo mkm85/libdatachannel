@@ -90,7 +90,7 @@ int main() {
 			auto rtp = reinterpret_cast<rtc::RtpHeader *>(buffer);
 			rtp->setSsrc(ssrc);
 
-			track->send(reinterpret_cast<const std::byte *>(buffer), len);
+			track->send(reinterpret_cast<const rtc::byte *>(buffer), len);
 		}
 
 	} catch (const std::exception &e) {

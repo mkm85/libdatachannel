@@ -42,22 +42,22 @@ WsHandshake::WsHandshake(string host, string path, std::vector<string> protocols
 }
 
 string WsHandshake::host() const {
-	std::unique_lock lock(mMutex);
+	std::unique_lock<std::mutex> lock(mMutex);
 	return mHost;
 }
 
 string WsHandshake::path() const {
-	std::unique_lock lock(mMutex);
+	std::unique_lock<std::mutex> lock(mMutex);
 	return mPath;
 }
 
 std::vector<string> WsHandshake::protocols() const {
-	std::unique_lock lock(mMutex);
+	std::unique_lock<std::mutex> lock(mMutex);
 	return mProtocols;
 }
 
 string WsHandshake::generateHttpRequest() {
-	std::unique_lock lock(mMutex);
+	std::unique_lock<std::mutex> lock(mMutex);
 	mKey = generateKey();
 
 	string out = "GET " + mPath +
@@ -80,7 +80,7 @@ string WsHandshake::generateHttpRequest() {
 }
 
 string WsHandshake::generateHttpResponse() {
-	std::unique_lock lock(mMutex);
+	std::unique_lock<std::mutex> lock(mMutex);
 	const string out = "HTTP/1.1 101 Switching Protocols\r\n"
 	                   "Server: libdatachannel\r\n"
 	                   "Connection: upgrade\r\n"
@@ -113,7 +113,7 @@ string GetHttpErrorName(int responseCode) {
 } // namespace
 
 string WsHandshake::generateHttpError(int responseCode) {
-	std::unique_lock lock(mMutex);
+	std::unique_lock<std::mutex> lock(mMutex);
 
 	const string error = to_string(responseCode) + " " + GetHttpErrorName(responseCode);
 
@@ -136,7 +136,7 @@ size_t WsHandshake::parseHttpRequest(const byte *buffer, size_t size) {
 	if (!isHttpRequest(buffer, size))
 		throw RequestError("Invalid HTTP request for WebSocket", 400);
 
-	std::unique_lock lock(mMutex);
+	std::unique_lock<std::mutex> lock(mMutex);
 	std::list<string> lines;
 	size_t length = parseHttpLines(buffer, size, lines);
 	if (length == 0)
@@ -188,7 +188,7 @@ size_t WsHandshake::parseHttpRequest(const byte *buffer, size_t size) {
 }
 
 size_t WsHandshake::parseHttpResponse(const byte *buffer, size_t size) {
-	std::unique_lock lock(mMutex);
+	std::unique_lock<std::mutex> lock(mMutex);
 	std::list<string> lines;
 	size_t length = parseHttpLines(buffer, size, lines);
 	if (length == 0)
