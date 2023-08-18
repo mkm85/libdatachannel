@@ -48,7 +48,7 @@ struct random_engine_wrapper {
 // Return a wrapped thread-local seeded random number generator
 template <typename Generator = std::mt19937, typename Result = typename Generator::result_type>
 auto random_engine() {
-	static thread_local std::seed_seq seed = random_seed();
+	static std::seed_seq seed = random_seed();
 	static thread_local Generator engine{seed};
 	return random_engine_wrapper<Generator, Result>{engine};
 }
