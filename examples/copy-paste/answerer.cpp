@@ -123,7 +123,7 @@ int main(int argc, char **argv) {
 				break;
 			}
 			rtc::Candidate local, remote;
-			std::optional<std::chrono::milliseconds> rtt = pc->rtt();
+			rtc::optional<std::chrono::milliseconds> rtt = pc->rtt();
 			if (pc->getSelectedCandidatePair(&local, &remote)) {
 				std::cout << "Local: " << local << std::endl;
 				std::cout << "Remote: " << remote << std::endl;

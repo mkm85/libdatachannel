@@ -37,7 +37,7 @@ DispatchQueue::~DispatchQueue() {
 
 void DispatchQueue::removePending() {
     std::unique_lock<std::mutex> lock(lockMutex);
-    queue = {};
+    queue = std::queue<std::function<void()> >();
 }
 
 void DispatchQueue::dispatch(const fp_t& op) {

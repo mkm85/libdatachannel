@@ -11,8 +11,7 @@
 #define helpers_hpp
 
 #include "rtc/rtc.hpp"
-
-#include <shared_mutex>
+#include "rtc/common.hpp"
 
 struct ClientTrackData {
     std::shared_ptr<rtc::Track> track;
@@ -42,7 +41,7 @@ struct Client {
     uint32_t rtpStartTimestamp = 0;
 
 private:
-    std::shared_mutex _mutex;
+    rtc::shared_mutex _mutex;
     State state = State::Waiting;
     std::string id;
     std::shared_ptr<rtc::PeerConnection> _peerConnection;

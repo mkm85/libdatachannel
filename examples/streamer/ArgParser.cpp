@@ -25,18 +25,18 @@ ArgParser::ArgParser(std::vector<std::pair<std::string, std::string>> options, s
     }
 }
 
-std::optional<std::string> ArgParser::toKey(std::string prefixedKey) {
+rtc::optional<std::string> ArgParser::toKey(std::string prefixedKey) {
     if (prefixedKey.find("--") == 0) {
         return prefixedKey.substr(2, prefixedKey.length());
     } else if (prefixedKey.find("-") == 0) {
         return prefixedKey.substr(1, prefixedKey.length());
     } else {
-        return std::nullopt;
+        return rtc::nullopt;
     }
 }
 
 bool ArgParser::parse(int argc, char **argv, std::function<bool (std::string, std::string)> onOption, std::function<bool (std::string)> onFlag) {
-    std::optional<std::string> currentOption = std::nullopt;
+    rtc::optional<std::string> currentOption = rtc::nullopt;
     for(int i = 1; i < argc; i++) {
         std::string current = argv[i];
         auto optKey = toKey(current);
@@ -52,7 +52,7 @@ bool ArgParser::parse(int argc, char **argv, std::function<bool (std::string, st
             if (!check) {
                 return false;
             }
-            currentOption = std::nullopt;
+            currentOption = rtc::nullopt;
         } else {
             std::cerr << "Unrecognized option " << current << std::endl;
             return false;

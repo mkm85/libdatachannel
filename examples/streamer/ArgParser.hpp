@@ -16,7 +16,7 @@
 #include <string>
 #include <set>
 #include <unordered_map>
-#include <optional>
+#include "rtc/common.hpp"
 
 struct ArgParser {
 private:
@@ -25,7 +25,7 @@ private:
     std::unordered_map<std::string, std::string> shortToLongMap{};
 public:
     ArgParser(std::vector<std::pair<std::string, std::string>> options, std::vector<std::pair<std::string, std::string>> flags);
-    std::optional<std::string> toKey(std::string prefixedKey);
+    rtc::optional<std::string> toKey(std::string prefixedKey);
     bool parse(int argc, char **argv, std::function<bool (std::string, std::string)> onOption, std::function<bool (std::string)> onFlag);
 };
 

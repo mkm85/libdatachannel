@@ -11,16 +11,17 @@
 #define h264fileparser_hpp
 
 #include "fileparser.hpp"
+#include "rtc/common.hpp"
 
 class H264FileParser: public FileParser {
-    std::optional<std::vector<std::byte>> previousUnitType5 = std::nullopt;
-    std::optional<std::vector<std::byte>> previousUnitType7 = std::nullopt;
-    std::optional<std::vector<std::byte>> previousUnitType8 = std::nullopt;
+    rtc::optional<std::vector<rtc::byte>> previousUnitType5 = rtc::nullopt;
+    rtc::optional<std::vector<rtc::byte>> previousUnitType7 = rtc::nullopt;
+    rtc::optional<std::vector<rtc::byte>> previousUnitType8 = rtc::nullopt;
 
 public:
     H264FileParser(std::string directory, uint32_t fps, bool loop);
     void loadNextSample() override;
-    std::vector<std::byte> initialNALUS();
+    std::vector<rtc::byte> initialNALUS();
 };
 
 #endif /* h264fileparser_hpp */

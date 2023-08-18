@@ -89,7 +89,8 @@ void wsOnMessage(json message, Configuration config, shared_ptr<WebSocket> ws) {
     if (type == "request") {
         clients.emplace(id, createPeerConnection(config, make_weak_ptr(ws), id));
     } else if (type == "answer") {
-        if (auto jt = clients.find(id); jt != clients.end()) {
+        auto jt = clients.find(id);
+        if (jt != clients.end()) {
             auto pc = jt->second->peerConnection;
             auto sdp = message["sdp"].get<string>();
             auto description = Description(sdp, type);
@@ -309,14 +310,14 @@ shared_ptr<Client> createPeerConnection(const Configuration &config,
     auto dc = pc->createDataChannel("ping-pong");
     dc->onOpen([id, wdc = make_weak_ptr(dc)]() {
         if (auto dc = wdc.lock()) {
-            dc->send("Ping");
+            dc->send(std::string("Ping"));
         }
     });
 
     dc->onMessage(nullptr, [id, wdc = make_weak_ptr(dc)](string msg) {
         cout << "Message from " << id << " received: " << msg << endl;
         if (auto dc = wdc.lock()) {
-            dc->send("Ping");
+            dc->send(std::string("Ping"));
         }
     });
     client->dataChannel = dc;

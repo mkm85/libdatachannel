@@ -51,7 +51,7 @@ void FileParser::loadNextSample() {
     }
 
     vector<uint8_t> fileContents((std::istreambuf_iterator<char>(source)), std::istreambuf_iterator<char>());
-    sample = *reinterpret_cast<vector<byte> *>(&fileContents);
+    sample = *reinterpret_cast<vector<rtc::byte> *>(&fileContents);
     sampleTime_us += sampleDuration_us;
 }
 
@@ -66,4 +66,3 @@ uint64_t FileParser::getSampleTime_us() {
 uint64_t FileParser::getSampleDuration_us() {
 	return sampleDuration_us;
 }
-

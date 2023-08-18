@@ -10,6 +10,7 @@
 #include "helpers.hpp"
 
 #include <ctime>
+#include <shared_mutex>
 
 #ifdef _MSC_VER
 // taken from https://stackoverflow.com/questions/10905892/equivalent-of-gettimeday-for-windows
@@ -62,12 +63,12 @@ ClientTrackData::ClientTrackData(shared_ptr<Track> track, shared_ptr<RtcpSrRepor
 }
 
 void Client::setState(State state) {
-	std::unique_lock lock(_mutex);
+	std::unique_lock<rtc::shared_mutex> lock(_mutex);
 	this->state = state;
 }
 
 Client::State Client::getState() {
-	std::shared_lock lock(_mutex);
+	std::shared_lock<rtc::shared_mutex> lock(_mutex);
 	return state;
 }
 
