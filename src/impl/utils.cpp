@@ -115,7 +115,7 @@ string base64_encode(const binary &data) {
 	return out;
 }
 
-std::seed_seq random_seed() {
+std::vector<unsigned int> random_seed() {
 	std::vector<unsigned int> seed = std::vector<unsigned int>();
 
 	// Seed with random device
@@ -137,8 +137,7 @@ std::seed_seq random_seed() {
 	seed.push_back(
 	    static_cast<unsigned int>(std::hash<std::thread::id>{}(std::this_thread::get_id())));
 
-	std::seed_seq s(seed.begin(), seed.end());
-	return s;
+	return seed;
 }
 
 namespace {

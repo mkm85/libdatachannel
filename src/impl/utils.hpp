@@ -33,7 +33,7 @@ string url_decode(const string &str);
 string base64_encode(const binary &data);
 
 // Return a random seed sequence
-std::seed_seq random_seed();
+std::vector<unsigned int> random_seed();
 
 template <typename Generator, typename Result = typename Generator::result_type>
 struct random_engine_wrapper {
@@ -48,7 +48,8 @@ struct random_engine_wrapper {
 // Return a wrapped thread-local seeded random number generator
 template <typename Generator = std::mt19937, typename Result = typename Generator::result_type>
 auto random_engine() {
-	static std::seed_seq seed = random_seed();
+	static auto s = random_seed();
+	static std::seed_seq seed = std::seed_seq(s.begin(), s.end());
 	static thread_local Generator engine{seed};
 	return random_engine_wrapper<Generator, Result>{engine};
 }
